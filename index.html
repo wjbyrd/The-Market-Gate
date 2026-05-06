@@ -1324,32 +1324,28 @@ button:active {
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #f7d982; 
+    color: #d7b35a; 
     margin-top: 4px;
     margin-bottom: 6px;
     opacity: 0.96;
     text-align: center;
     font-weight: 600;
 
-    border-bottom: 1px solid rgba(247,217,130,0.34);
+    border-bottom: 1px solid rgba(215,179,90,0.35);
     padding-bottom: 2px;
 
     text-shadow:
-        0 0 6px rgba(247,217,130,0.32),
-        0 0 12px rgba(56,189,248,0.16),
-        0 2px 5px rgba(0,0,0,0.88);
+        0 0 6px rgba(56,189,248,0.45),
+        0 0 10px rgba(215,179,90,0.35);
 }
 
 #wizardImage{
     width:100%;
     max-width:180px;
-
     filter:
-        drop-shadow(0 0 12px rgba(56,189,248,0.42))
-        drop-shadow(0 0 24px rgba(247,217,130,0.22))
-        drop-shadow(0 0 30px rgba(0,0,0,0.84));
-
-    animation: wizardFloat 4s ease-in-out infinite, torchFlicker 5s infinite;
+        drop-shadow(0 0 10px rgba(56,189,248,0.65))
+        drop-shadow(0 0 18px rgba(215,179,90,0.45));
+    animation: wizardFloat 4s ease-in-out infinite;
 }
     
 /* =========================================
@@ -1792,25 +1788,23 @@ DO NOT REMOVE:
     </div>
 
     <!-- Artifact slots (IDs must match unlock system in JS) -->
-    <div id="artifactVault">
-        <h3>Acquired Artifacts</h3>
-        <div class="vaultRow">
-            <div id="vaultSignal" class="artifactSlot">
-                <img src="signal.png" alt="Price Signal">
-                <span>Price Signal</span>
-            </div>
-
-            <div id="vaultScale" class="artifactSlot">
-                <img src="scale.png" alt="Scale of Exchange">
-                <span>Scale of Exchange</span>
-            </div>
-
-            <div id="vaultCompass" class="artifactSlot">
-                <img src="compass.png" alt="Elasticity Compass">
-                <span>Elasticity Compass</span>
-            </div>
+<div id="artifactVault">
+    <h3>Acquired Artifacts</h3>
+    <div class="vaultRow">
+        <div id="vaultCompass" class="artifactSlot">
+            <img src="compass.png" alt="Frontier Compass">
+            <span>Frontier Compass</span>
+        </div>
+        <div id="vaultLens" class="artifactSlot">
+            <img src="lens.png" alt="Signal Lens">
+            <span>Signal Lens</span>
+        </div>
+        <div id="vaultScales" class="artifactSlot">
+            <img src="scales.png" alt="Magistrate's Scales">
+            <span>Magistrate's Scales</span>
         </div>
     </div>
+</div>
 </div>
 
 <!-- MAIN PANEL -->
@@ -1818,8 +1812,8 @@ DO NOT REMOVE:
 <div class="main-panel">
     <div id="gameShell">
         <div id="wizardBox">
-            <div id="wizardName">The Market Guide</div>
-            <img src="market_guide.png" id="wizardImage" alt="The Market Guide">
+            <div id="wizardName">The Appraiser</div>
+            <img src="appraiser.png" id="wizardImage" alt="The Appraiser">
         </div>
 
         <!-- GAME -->
@@ -2131,54 +2125,305 @@ function inferObjective(question){
     const tag = (question.tag || "general").toLowerCase();
     const type = (question.type || "default").toLowerCase();
 
-   // =============================================
+// =============================================
 // AGENCY PROTOCOL OBJECTIVE INFERENCE
 // Chapters 19–22: Risk, Information Asymmetry,
 // Moral Hazard, Incentives, Organizational Design
 // =============================================
 
-if(tag === "insurance" || tag === "risk" || tag === "wealth"){
-    if(q.includes("insurance") || q.includes("risk pooling")) return "LO19.1_insurance_wealth_creation";
-    if(q.includes("wealth") || q.includes("expected value")) return "LO19.1_wealth_creation";
-    return "LO19.1_insurance_wealth_creation";
-}
+// =============================================
+    // THE MARKET GATE OBJECTIVE INFERENCE
+    // Chapters 1, 2, 4, 6
+    // Tradeoffs, opportunity cost, marginal thinking,
+    // incentives, models, PPF, markets, supply/demand,
+    // price controls, taxes, and tax incidence
+    // =============================================
 
-if(tag === "adverse_selection" || tag === "hidden_info" || tag === "selection"){
-    if(q.includes("adverse selection")) return "LO19.2_adverse_selection";
-    if(q.includes("high risk") || q.includes("low risk")) return "LO19.2_hidden_information";
-    if(q.includes("screening")) return "LO19.4_screening";
-    if(q.includes("signaling")) return "LO19.4_signaling";
-    if(q.includes("auction") || q.includes("online")) return "LO19.5_market_solutions";
-    return "LO19.3_solutions_adverse_selection";
-}
+    // -----------------------------
+    // CHAPTER 1 — Core Principles
+    // -----------------------------
 
-if(tag === "moral_hazard" || tag === "hidden_action"){
-    if(q.includes("moral hazard")) return "LO20.1_moral_hazard";
-    if(q.includes("shirking")) return "LO20.4_shirking";
-    if(q.includes("lending") || q.includes("loan")) return "LO20.5_lending_moral_hazard";
-    if(q.includes("monitor") || q.includes("incentive")) return "LO20.3_moral_hazard_solutions";
-    return "LO20.2_anticipate_moral_hazard";
-}
+    if(tag === "tradeoffs" || tag === "scarcity" || tag === "choice"){
+        if(q.includes("trade off") || q.includes("trade-off") || q.includes("scarcity") || q.includes("choice")) {
+            return "LO1.1_tradeoffs_analysis";
+        }
+        if(q.includes("opportunity cost") || q.includes("give up") || q.includes("forgone")) {
+            return "LO1.2_opportunity_cost";
+        }
+        return "LO1.1_tradeoffs_analysis";
+    }
 
-if(tag === "principal_agent" || tag === "incentives" || tag === "agency"){
-    if(q.includes("principal") && q.includes("agent")) return "LO21.1_principal_agent";
-    if(q.includes("information asymmetry")) return "LO21.2_asymmetry_and_conflict";
-    if(q.includes("reduce cost") || q.includes("control")) return "LO21.3_control_conflict";
-    if(q.includes("game incentives") || q.includes("gaming")) return "LO21.5_gaming_incentives";
-    if(q.includes("analyze") || q.includes("framework")) return "LO21.6_analyze_conflict";
-    return "LO21.2_asymmetry_and_conflict";
-}
+    if(tag === "opportunity_cost" || tag === "ppf_cost"){
+        if(q.includes("calculate") || q.includes("slope") || q.includes("per") || q.includes("give up")) {
+            return "LO1.2_calculate_opportunity_cost";
+        }
+        return "LO1.2_opportunity_cost";
+    }
 
-if(tag === "organization" || tag === "structure" || tag === "firms"){
-    if(q.includes("transfer pricing")) return "LO22.2_transfer_pricing";
-    if(q.includes("profit center")) return "LO22.3_profit_center";
-    if(q.includes("cost center")) return "LO22.3_cost_center";
-    if(q.includes("functional")) return "LO22.4_functional_units";
-    if(q.includes("coordination")) return "LO22.5_coordination";
-    if(q.includes("multidivisional")) return "LO22.6_multidivisional_structure";
-    if(q.includes("budget") || q.includes("gaming")) return "LO22.7_budget_games";
-    return "LO22.1_parent_company_objective";
-}
+    if(tag === "marginal" || tag === "marginal_reasoning" || tag === "margin"){
+        if(q.includes("marginal benefit") || q.includes("marginal cost") || q.includes("additional") || q.includes("one more")) {
+            return "LO1.3_marginal_decision";
+        }
+        if(type === "calculation") {
+            return "LO1.3_calculate_margin";
+        }
+        return "LO1.3_marginal_reasoning";
+    }
+
+    if(tag === "incentives" || tag === "behavior"){
+        if(q.includes("incentive") || q.includes("respond") || q.includes("behavior") || q.includes("encourage") || q.includes("discourage")) {
+            return "LO1.4_incentives_behavior";
+        }
+        return "LO1.4_incentives_behavior";
+    }
+
+    if(tag === "trade" || tag === "specialization" || tag === "comparative_advantage"){
+        if(q.includes("trade") || q.includes("specialization") || q.includes("comparative advantage") || q.includes("nations")) {
+            return "LO1.5_gains_from_trade";
+        }
+        return "LO1.5_trade_good_for_everyone";
+    }
+
+    if(tag === "markets" || tag === "market_allocation" || tag === "market_failure"){
+        if(q.includes("allocate") || q.includes("scarce resources") || q.includes("invisible hand") || q.includes("markets")) {
+            return "LO1.6_markets_allocate_resources";
+        }
+        if(q.includes("not perfect") || q.includes("failure") || q.includes("externality") || q.includes("market power")) {
+            return "LO1.6_markets_not_perfect";
+        }
+        return "LO1.6_markets_good_not_perfect";
+    }
+
+    // -----------------------------
+    // CHAPTER 2 — Economic Thinking and Models
+    // -----------------------------
+
+    if(tag === "models" || tag === "scientific_method" || tag === "assumptions"){
+        if(q.includes("model") || q.includes("assumption") || q.includes("simplify") || q.includes("science") || q.includes("scientific")) {
+            return "LO2.1_models_scientific_method";
+        }
+        return "LO2.1_economic_models";
+    }
+
+    if(tag === "ppf" || tag === "production_possibilities" || tag === "frontier"){
+        if(q.includes("ppf") || q.includes("production possibilities") || q.includes("frontier")) {
+            return "LO2.2_ppf_tradeoffs";
+        }
+        if(q.includes("efficient") || q.includes("inefficient") || q.includes("unattainable") || q.includes("attainable")) {
+            return "LO2.2_ppf_efficiency";
+        }
+        if(q.includes("opportunity cost") || q.includes("slope") || q.includes("bowed")) {
+            return "LO2.2_ppf_opportunity_cost";
+        }
+        return "LO2.2_ppf_choices_tradeoffs";
+    }
+
+    if(tag === "circular_flow" || tag === "households" || tag === "firms"){
+        if(q.includes("household") || q.includes("firm") || q.includes("factor market") || q.includes("product market") || q.includes("circular flow")) {
+            return "LO2.2_circular_flow_model";
+        }
+        return "LO2.2_circular_flow";
+    }
+
+    if(tag === "micro_macro" || tag === "microeconomics" || tag === "macroeconomics"){
+        if(q.includes("individual") || q.includes("firm") || q.includes("market for")) {
+            return "LO2.3_microeconomics";
+        }
+        if(q.includes("inflation") || q.includes("unemployment") || q.includes("gdp") || q.includes("economy-wide")) {
+            return "LO2.3_macroeconomics";
+        }
+        return "LO2.3_micro_vs_macro";
+    }
+
+    if(tag === "positive_normative" || tag === "positive" || tag === "normative"){
+        if(q.includes("should") || q.includes("ought") || q.includes("better") || q.includes("fair")) {
+            return "LO2.4_normative_statement";
+        }
+        if(q.includes("is") || q.includes("will") || q.includes("data") || q.includes("testable")) {
+            return "LO2.4_positive_statement";
+        }
+        return "LO2.4_positive_vs_normative";
+    }
+
+    if(tag === "policy" || tag === "economist_role"){
+        if(q.includes("policy") || q.includes("advisor") || q.includes("recommend") || q.includes("economist")) {
+            return "LO2.5_economists_policy_role";
+        }
+        return "LO2.5_policy_roles";
+    }
+
+    // -----------------------------
+    // CHAPTER 4 — Supply and Demand
+    // -----------------------------
+
+    if(tag === "competitive_market" || tag === "competition"){
+        if(q.includes("competitive market") || q.includes("many buyers") || q.includes("many sellers") || q.includes("price taker")) {
+            return "LO4.1_competitive_market";
+        }
+        return "LO4.1_define_competitive_market";
+    }
+
+    if(tag === "demand" || tag === "quantity_demanded"){
+        if(q.includes("law of demand") || q.includes("quantity demanded") || q.includes("price rises") || q.includes("price falls")) {
+            return "LO4.2_law_of_demand";
+        }
+        if(q.includes("movement along") || q.includes("change in quantity demanded")) {
+            return "LO4.2_quantity_demanded";
+        }
+        if(q.includes("demand shifts") || q.includes("income") || q.includes("substitute") || q.includes("complement") || q.includes("taste") || q.includes("expectations")) {
+            return "LO4.2_demand_shifts";
+        }
+        return "LO4.2_demand";
+    }
+
+    if(tag === "supply" || tag === "quantity_supplied"){
+        if(q.includes("law of supply") || q.includes("quantity supplied") || q.includes("price rises") || q.includes("price falls")) {
+            return "LO4.3_law_of_supply";
+        }
+        if(q.includes("movement along") || q.includes("change in quantity supplied")) {
+            return "LO4.3_quantity_supplied";
+        }
+        if(q.includes("supply shifts") || q.includes("input cost") || q.includes("technology") || q.includes("seller") || q.includes("tax") || q.includes("subsidy")) {
+            return "LO4.3_supply_shifts";
+        }
+        return "LO4.3_supply";
+    }
+
+    if(tag === "equilibrium" || tag === "market_changes" || tag === "surplus_shortage"){
+        if(q.includes("equilibrium") || q.includes("quantity demanded equals quantity supplied") || q.includes("market clearing")) {
+            return "LO4.4_equilibrium";
+        }
+        if(q.includes("shortage") || q.includes("excess demand")) {
+            return "LO4.4_shortage";
+        }
+        if(q.includes("surplus") || q.includes("excess supply")) {
+            return "LO4.4_surplus";
+        }
+        if(q.includes("shift") || q.includes("increase in demand") || q.includes("decrease in demand") || q.includes("increase in supply") || q.includes("decrease in supply")) {
+            return "LO4.4_analyze_market_changes";
+        }
+        return "LO4.4_supply_demand_together";
+    }
+
+    if(tag === "prices" || tag === "price_signal" || tag === "allocation"){
+        if(q.includes("price") || q.includes("signal") || q.includes("allocate") || q.includes("scarce resources")) {
+            return "LO4.5_prices_allocate_resources";
+        }
+        return "LO4.5_role_of_prices";
+    }
+
+    // -----------------------------
+    // CHAPTER 6 — Government Policies
+    // -----------------------------
+
+    if(tag === "price_ceiling" || tag === "ceiling"){
+        if(q.includes("binding") || q.includes("below equilibrium")) {
+            return "LO6.1_binding_price_ceiling";
+        }
+        if(q.includes("shortage") || q.includes("quantity demanded") || q.includes("quantity supplied")) {
+            return "LO6.1_calculate_ceiling_effects";
+        }
+        if(q.includes("rent control") || q.includes("price ceiling")) {
+            return "LO6.1_price_ceiling";
+        }
+        return "LO6.1_price_ceiling_effects";
+    }
+
+    if(tag === "price_floor" || tag === "floor"){
+        if(q.includes("binding") || q.includes("above equilibrium")) {
+            return "LO6.2_binding_price_floor";
+        }
+        if(q.includes("surplus") || q.includes("quantity supplied") || q.includes("quantity demanded")) {
+            return "LO6.2_calculate_floor_effects";
+        }
+        if(q.includes("minimum wage") || q.includes("price floor")) {
+            return "LO6.2_price_floor";
+        }
+        return "LO6.2_price_floor_effects";
+    }
+
+    if(tag === "tax" || tag === "tax_wedge"){
+        if(q.includes("tax") && (q.includes("quantity") || q.includes("price") || q.includes("sold"))) {
+            return "LO6.3_tax_price_quantity";
+        }
+        if(q.includes("wedge") || q.includes("buyers pay") || q.includes("sellers receive")) {
+            return "LO6.3_tax_wedge";
+        }
+        return "LO6.3_tax_effects";
+    }
+
+    if(tag === "tax_equivalence" || tag === "buyer_tax" || tag === "seller_tax"){
+        if(q.includes("buyer") && q.includes("seller")) {
+            return "LO6.4_buyer_seller_tax_equivalence";
+        }
+        if(q.includes("equivalent") || q.includes("same outcome")) {
+            return "LO6.4_tax_equivalence";
+        }
+        return "LO6.4_taxes_on_buyers_and_sellers";
+    }
+
+    if(tag === "tax_incidence" || tag === "incidence" || tag === "elasticity"){
+        if(q.includes("burden") || q.includes("incidence") || q.includes("split")) {
+            return "LO6.5_tax_burden_split";
+        }
+        if(q.includes("elastic") || q.includes("inelastic")) {
+            return "LO6.5_elasticity_tax_incidence";
+        }
+        return "LO6.5_tax_incidence";
+    }
+
+    // -----------------------------
+    // BROAD FALLBACKS
+    // These catch sloppy tags before they pollute the data.
+    // -----------------------------
+
+    if(q.includes("opportunity cost") || q.includes("give up") || q.includes("forgone")) {
+        return "LO1.2_opportunity_cost";
+    }
+
+    if(q.includes("marginal benefit") || q.includes("marginal cost") || q.includes("one more") || q.includes("additional")) {
+        return "LO1.3_marginal_reasoning";
+    }
+
+    if(q.includes("incentive") || q.includes("respond to")) {
+        return "LO1.4_incentives_behavior";
+    }
+
+    if(q.includes("production possibilities") || q.includes("ppf") || q.includes("frontier")) {
+        return "LO2.2_ppf_choices_tradeoffs";
+    }
+
+    if(q.includes("positive statement") || q.includes("normative statement")) {
+        return "LO2.4_positive_vs_normative";
+    }
+
+    if(q.includes("competitive market") || q.includes("many buyers") || q.includes("many sellers")) {
+        return "LO4.1_competitive_market";
+    }
+
+    if(q.includes("demand") || q.includes("quantity demanded")) {
+        return "LO4.2_demand";
+    }
+
+    if(q.includes("supply") || q.includes("quantity supplied")) {
+        return "LO4.3_supply";
+    }
+
+    if(q.includes("equilibrium") || q.includes("shortage") || q.includes("surplus")) {
+        return "LO4.4_supply_demand_together";
+    }
+
+    if(q.includes("price ceiling") || q.includes("rent control")) {
+        return "LO6.1_price_ceiling_effects";
+    }
+
+    if(q.includes("price floor") || q.includes("minimum wage")) {
+        return "LO6.2_price_floor_effects";
+    }
+
+    if(q.includes("tax") || q.includes("tax wedge")) {
+        return "LO6.3_tax_effects";
+    }
 
 return `${tag}_${type}`;}
 
@@ -2667,21 +2912,21 @@ const TIMING = {
 // Do NOT remove bossHealth logic.
      
 const artifacts = {
-ledger:{
-    img:"ledger.png",
-    title:"The Red Ledger",
-    text:"Hidden risk has been priced. Bad information no longer hides in the margins."
-},
-lens:{
-    img:"lens.png",
-    title:"The Glass Lens",
-    text:"Hidden action has been exposed. The agent’s choices are no longer invisible."
-},
-algorithm:{
-    img:"algorithm.png",
-    title:"The Incentive Algorithm",
-    text:"The system has been rewritten. Rewards, constraints, and behavior now move as one."
-}
+    compass: {
+        img: "compass.png",
+        title: "Frontier Compass",
+        text: "The compass marks the production frontier. Every step toward one good carries the cost of leaving another behind."
+    },
+    lens: {
+        img: "lens.png",
+        title: "Signal Lens",
+        text: "The lens reveals the meeting of supply and demand. Prices move, incentives shift, and the market signal sharpens."
+    },
+    scales: {
+        img: "scales.png",
+        title: "Magistrate's Scales",
+        text: "The scales weigh shortage against surplus. When prices are held away from equilibrium, imbalance takes hold."
+    }
 };
   
 // =============================================
@@ -2762,7 +3007,7 @@ function startGame() {
 
     sendGameData({
         runID: runID,
-        game: "The Agency Protocol",
+        game: "The Market Gate",
         event: "start",
         user: username,
         email: studentEmail
@@ -2790,9 +3035,9 @@ function startGame() {
     localStorage.removeItem("gauntletRoom");
 
     // Agency Protocol artifact keys — keep these matched to your actual Agency Protocol IDs.
-	  localStorage.removeItem("vaultLedger");
+	  localStorage.removeItem("vaultCompass");
 	  localStorage.removeItem("vaultLens");
-	  localStorage.removeItem("vaultAlgorithm");
+	  localStorage.removeItem("vaultScales");
 	
     questionHistory = {
         easy: [], medium: [], hard: [], elite: [], calculation: [],
@@ -2819,16 +3064,16 @@ function startGame() {
    // IMPORTANT:
    // localStorage keys must match the HTML element ids.
    // =============================================    
-if(localStorage.getItem("vaultLedger")){
-    document.getElementById("vaultLedger").classList.add("unlocked");
+if(localStorage.getItem("vaulCompass")){
+    document.getElementById("vaultCompass").classList.add("unlocked");
 }
 
 if(localStorage.getItem("vaultLens")){
     document.getElementById("vaultLens").classList.add("unlocked");
 }    
 
-if(localStorage.getItem("vaultAlgorithm")){
-    document.getElementById("vaultAlgorithm").classList.add("unlocked");
+if(localStorage.getItem("vaultScales")){
+    document.getElementById("vaultScales").classList.add("unlocked");
 }
   
 // Start game loop: music + timer + first question
@@ -2868,13 +3113,13 @@ document.getElementById("emailInput").addEventListener("keypress", function(even
 // This affects UI only, not game logic.
 // =============================================
 function getAreaName(r) {
-    if (r <= 9) return "The Risk Archive";
-    if (r === 10) return "The Underwriter’s Desk";
-    if (r <= 19) return "The Surveillance Floor";
-    if (r === 20) return "The Auditor’s Chamber";
-    if (r <= 25) return "The Incentive Corridor";
-    if (r <= 29) return "The Control Suite";
-    return "The Architect’s Office";
+    if (r <= 9) return "The Frontier Arcade";
+    if (r === 10) return "The Keeper’s Reliquary";
+    if (r <= 19) return "The Signal Bazaar";
+    if (r === 20) return "The Broker’s Exchange";
+    if (r <= 25) return "The Equilibrium Walk";
+    if (r <= 29) return "The Decree Arcade";
+    return "The Magistrate’s Tribunal";
 }
 	 
 // =============================================
@@ -2898,53 +3143,63 @@ function getAreaName(r) {
 // This system controls immersion and feedback tone.
 // =============================================
 const wizardFeedback = {
-    correct: [
-        "Good. The incentives align.",
-        "Correct. The agent moves as predicted.",
-        "That contract holds.",
-        "The hidden information has been exposed.",
-        "Clean read. The system accepts it."
-    ],
-    wrong: [
-        "No. That incentive collapses.",
-        "Bad read. You missed the hidden action.",
-        "Incorrect. The agent games that system.",
-        "That contract fails under pressure.",
-        "The Principal rejects that logic."
-    ]
+correct: [
+  "The value holds.",
+  "A sound exchange.",
+  "You weighed the cost correctly.",
+  "That choice clears the market.",
+  "Accepted. The signal was read."
+],
+wrong: [
+  "Mispriced.",
+  "That value collapses.",
+  "You ignored the tradeoff.",
+  "Bad exchange. Try again.",
+  "The signal was there. You missed it."
+]
 };
 
 const wizardLines = {
     definition: [
-        "Name the conflict.",
-        "Define the information problem.",
-        "Identify the agent’s incentive.",
-        "Classify the risk."
+        "Name the principle.",
+        "Define the tradeoff.",
+        "Identify the economic idea.",
+        "Classify the market force.",
+        "State the rule of exchange.",
+        "What concept is being valued?"
     ],
     interpretation: [
-        "Trace the hidden action.",
+        "Read the market signal.",
+        "Trace the shift.",
         "Follow the incentive.",
-        "Read the information gap.",
-        "What behavior does this contract create?"
+        "What changes in the exchange?",
+        "Compare the costs and benefits.",
+        "Watch price and quantity move."
     ],
     trap: [
-        "That answer is dressed like alignment.",
-        "Do not confuse hidden information with hidden action.",
-        "Slow down. The agent is gaming the rule.",
-        "Audit the incentive before you trust it.",
-        "Find the behavior the system rewards."
+        "That answer looks valuable, but it is mispriced.",
+        "Do not confuse demand with quantity demanded.",
+        "Do not confuse supply with quantity supplied.",
+        "Slow down. The curve did not move.",
+        "The signal is there. Read it carefully.",
+        "Check the tradeoff before you choose.",
+        "A lower price is not always a lower cost.",
+        "Do not mistake movement along a curve for a shift."
     ],
     calculation: [
-        "Price the risk.",
-        "Calculate the expected payoff.",
-        "Measure the incentive.",
-        "Numbers first. Then behavior follows."
+        "Price the tradeoff.",
+        "Calculate the market response.",
+        "Measure the change.",
+        "Find the elasticity.",
+        "Numbers first. The market follows.",
+        "Quantify the exchange."
     ],
     default: [
-        "Decide.",
-        "Commit.",
-        "Proceed.",
-        "Write the contract."
+        "Choose the better trade.",
+        "Read the signal.",
+        "Weigh the cost.",
+        "Make the exchange.",
+        "Decide what the market says."
     ]
 };
      
@@ -3774,7 +4029,7 @@ function updateMazeTrack() {
         
         // Determine the icon and state
         if (i < room) {
-            box.innerText = "🟨";
+            box.innerText = "⬜";
             box.style.opacity = "0.6";
         } else if (i === room) {
             box.classList.add("active"); // Trigger the blue pulse
@@ -3782,10 +4037,10 @@ function updateMazeTrack() {
             box.innerText = "🟦";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="underwriter.png" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="auditor.png" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="architect.png" class="boss-icon">';box.classList.add("boss30");}
-            else box.innerText = "⬛";
+            if (i === 10){box.innerHTML = '<img src="keeper.png" class="boss-icon">';box.classList.add("boss10");}
+            else if (i === 20){box.innerHTML = '<img src="broker.png" class="boss-icon">';box.classList.add("boss20");}
+            else if (i === 30){box.innerHTML = '<img src="magistrate.png" class="boss-icon">';box.classList.add("boss30");}
+            else box.innerText = "🟨";
         }
         
         track.appendChild(box);
@@ -3993,19 +4248,21 @@ function loadQuestion() {
    		imageBox.style.display = "block";
 		}
 
-      // 3. Boss Identity UI
-      let bTitle = room === 10 ? "THE UNDERWRITER OF HIDDEN RISK"
-        : room === 20 ? "THE AUDITOR OF MORAL HAZARD"
-        : "THE CHIEF ARCHITECT OF INCENTIVES";
+// 3. Boss Identity UI — Market Gate
+	let bTitle = room === 10 ? "THE FRONTIER KEEPER"
+   	    : room === 20 ? "THE SIGNAL BROKER"
+   	    : "THE PRICE MAGISTRATE";
 
-      let bColor = room === 10 ? "#b91c1c"   // Red Ledger / hidden risk
-        : room === 20 ? "#38bdf8"          // Glass Lens / audit blue
-        : "#f0c86a";                       // Incentive Algorithm / executive gold
-       
-        document.getElementById("srAnnouncements").innerText =`Boss encounter. ${bTitle}. Prepare yourself`;
-        bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
-        bossMsg.style.color = bColor;
-        gameBox.style.setProperty('--bossColor', bColor);
+	let bColor = room === 10 ? "#d7b35a"   // Frontier Compass / old gold
+ 	   : room === 20 ? "#38bdf8"          // Signal Lens / market blue
+  	   : "#f0c86a";                       // Magistrate's Scales / civic gold
+
+	document.getElementById("srAnnouncements").innerText =
+  	  `Boss encounter. ${bTitle}. Prepare yourself`;
+
+	bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
+	bossMsg.style.color = bColor;
+	gameBox.style.setProperty('--bossColor', bColor);
 		
         let bossImage = "";
         let bossClass = "";
@@ -4021,16 +4278,16 @@ function loadQuestion() {
 // =============================================
         
     if(room === 10){
-        bossImage = "underwriter.png";
-        bossClass = "underwriterGlow";
+        bossImage = "keeper.png";
+        bossClass = "keeperGlow";
     }
     else if(room === 20){
-        bossImage = "auditor.png";
-        bossClass = "auditorGlow";
+        bossImage = "broker.png";
+        bossClass = "brokerGlow";
     }
     else{
-        bossImage = "architect.png";
-        bossClass = "architectGlow";
+        bossImage = "magistrate.png";
+        bossClass = "magistrateGlow";
     }
 
         questionElement.innerHTML = `
@@ -4223,10 +4480,10 @@ function answer(choice) {
     // =============================================
     sendGameData({
         runID: runID,
-		    game: "The Agency Protocol",
+		game: "The Market Gate",
         event: "question",
         user: username || "anonymous",
-		    email: studentEmail || "",
+		email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
         correct: isCorrect ? 1 : 0,
@@ -4234,9 +4491,9 @@ function answer(choice) {
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
         responseTime: responseTime,
-	      attempt: totalAttempts ?? 0,
-		    streak: streak ?? 0,
-	    	elapsedTime: startTime ? (Date.now() - startTime) : 0,
+	    attempt: totalAttempts ?? 0,
+		streak: streak ?? 0,
+	    elapsedTime: startTime ? (Date.now() - startTime) : 0,
         adaptiveMode: adaptiveMode
     });
 
@@ -4325,7 +4582,7 @@ function answer(choice) {
     adaptiveMode = "support";
 
     msgElement.innerHTML =
-        `<span class='fade-out-text'>Recovery confirmed. Return to the Agency.</span>`;
+        `<span class='fade-out-text'>Recovery confirmed. Return to the Gate.</span>`;
 
     room = returnRoom;
     localStorage.setItem("gauntletRoom", room);
@@ -4357,20 +4614,20 @@ function answer(choice) {
          // Boss defeated
          sendGameData({
             runID: runID,
-			      game: "The Agency Protocol",
+			game: "The Market Gate",
             event: "boss_defeated",
             user: username,
-		      	email: studentEmail,
+		    email: studentEmail,
             room: room
          });
            
          bossPool = [];
            
-        // Boss defeated (CHANGE ARTIFACT NAMES)
+       // Boss defeated — Market Gate boss artifacts
 if(room === 10){
-    document.getElementById("vaultLedger").classList.add("unlocked");
-    localStorage.setItem("vaultLedger", "true");
-    showArtifact(artifacts.ledger.img, artifacts.ledger.title, artifacts.ledger.text);
+    document.getElementById("vaultCompass").classList.add("unlocked");
+    localStorage.setItem("vaultCompass", "true");
+    showArtifact(artifacts.compass.img, artifacts.compass.title, artifacts.compass.text);
 }
 
 if(room === 20){
@@ -4380,9 +4637,9 @@ if(room === 20){
 }
 
 if(room === 30){
-    document.getElementById("vaultAlgorithm").classList.add("unlocked");
-    localStorage.setItem("vaultAlgorithm", "true");
-    showArtifact(artifacts.algorithm.img, artifacts.algorithm.title, artifacts.algorithm.text);
+    document.getElementById("vaultScales").classList.add("unlocked");
+    localStorage.setItem("vaultScales", "true");
+    showArtifact(artifacts.scales.img, artifacts.scales.title, artifacts.scales.text);
 }
 
 // ... (Inside the Boss Victory check)
@@ -4477,7 +4734,7 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
         const remediationMessage = remediationState.careless
             ? "You rushed the choice. Slow down and regain control."
             : remediationState.slowStruggle
-                ? "The Agency resists. Rebuild the concept before advancing."
+                ? "The Gate doesn't budge. Rebuild the concept before advancing."
                 : "Your control fractured. Repair the weakness before moving on.";
 
         msgElement.innerHTML =
@@ -4557,15 +4814,15 @@ function handleStreakVisuals() {
     let streakColor = "#f0c86a";
 
     if (streak === 5) {
-        streakMsg = `<span class="streak"><img src="streakcard.png" class="streak-icon">ACCESS CARD</span>`;
+        streakMsg = `<span class="streak"><img src="streaksignal.png" class="streak-icon">DEMAND SIGNAL FOUND</span>`;
         streakColor = "#f0c86a";
     }
     else if (streak === 10) {
-        streakMsg = `<span class="streak"><img src="streakstamp.png" class="streak-icon">CONTROL STAMP</span>`;
+        streakMsg = `<span class="streak"><img src="streakkey.png" class="streak-icon">ENTRY KEY CLAIMED</span>`;
         streakColor = "#38bdf8";
     }
     else if (streak === 20) {
-        streakMsg = `<span class="streak"><img src="streakseal.png" class="streak-icon">PERFORMANCE SEAL</span>`;
+        streakMsg = `<span class="streak"><img src="streakseal.png" class="streak-icon">EQUILIBRIUM SEALED</span>`;
         streakColor = "#f5e6b8";
     }
 
@@ -4733,27 +4990,27 @@ function showKnowledgeRoom(bossRoom) {
 // - actual boss encounters
 // =============================================    
 if (bossRoom === 10) {
-    title = "THE UNDERWRITER OF HIDDEN RISK YIELDS: THE RED LEDGER OPENS";
-    summary = "The fine print burns clean. You have priced hidden risk, exposed adverse selection, and forced bad information out of the shadows.";
+    title = "THE FRONTIER KEEPER YIELDS: THE FRONTIER COMPASS IS YOURS";
+    summary = "The old boundary bends, but it does not break. You have read the production frontier, measured opportunity cost, and recognized the tradeoffs hidden behind every choice.";
 } 
 else if (bossRoom === 20) {
-    title = "THE AUDITOR OF MORAL HAZARD FALLS: THE GLASS LENS CLEARS";
-    summary = "The surveillance floor goes silent. You have traced hidden action, exposed shirking, and shown how monitoring and incentives reshape behavior.";
+    title = "THE SIGNAL BROKER FALLS: THE SIGNAL LENS CLEARS";
+    summary = "The market noise settles. You have separated demand from quantity demanded, supply from quantity supplied, and traced how shifts move price and quantity through the market.";
 } 
 else if (bossRoom === 30) {
-    title = "THE CHIEF ARCHITECT OF INCENTIVES BREAKS: THE INCENTIVE ALGORITHM IS YOURS";
-    summary = "The control suite goes dark. You have read the principal-agent conflict, anticipated how incentives get gamed, and seized the system that turns rules into behavior.";
+    title = "THE PRICE MAGISTRATE BREAKS: THE MAGISTRATE'S SCALES ARE YOURS";
+    summary = "The decree has been judged. You have exposed binding ceilings, binding floors, shortages, surpluses, and tax burdens. When policy forces price away from equilibrium, you now see the imbalance it creates.";
 }
-  
-    // Update the UI
-   qContainer.innerHTML = `
+
+// Update the UI
+qContainer.innerHTML = `
     <span class="boss-title">${title}</span>
     <div class="boss-q">${summary}</div>
-   `;
-    
-    // logic to ensure Room 30 triggers the end game, while 10 and 20 trigger the next level
-    let nextAction = bossRoom === 30 ? "handleVictory()" : "room++; loadQuestion();";
-    let buttonLabel = bossRoom === 30 ? "FINALIZE THE AGENCY'S PROTOCOL →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
+`;
+
+// logic to ensure Room 30 triggers the end game, while 10 and 20 trigger the next level
+let nextAction = bossRoom === 30 ? "handleVictory()" : "room++; loadQuestion();";
+let buttonLabel = bossRoom === 30 ? "COMPLETE THE MARKET GATE →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
 
 aContainer.innerHTML = `
 <button id="continueBtn" class="continue-btn">
@@ -4810,7 +5067,7 @@ document.getElementById("continueBtn").onclick = () => {
 // DO NOT CHANGE:
 // - string structure (name|acc|streak|total|CITADEL00)
 // - hashing logic
-// - return format ("CITADEL-...")
+// - return format ("GATE-...")
 //
 // Changing this WILL:
 // - invalidate all existing completion codes
@@ -4825,7 +5082,7 @@ document.getElementById("continueBtn").onclick = () => {
 // It is a lightweight integrity check.
 // =============================================
 function generateCode(name, acc, streak, total){
-    let str = `${name}|${acc}|${streak}|${total}|AGENCY01`;
+    let str = `${name}|${acc}|${streak}|${total}|GATE07`;
     let hash = 0;
 
     for(let i = 0; i < str.length; i++){
@@ -4881,10 +5138,10 @@ function handleVictory() {
 
 sendGameData({
     runID: runID,
-	  game: "The Agency Protocol",
+	game: "The Market Gate",
     event: "complete",
     user: username,
-	  email: studentEmail,
+	email: studentEmail,
     room: room,
     questionId: 0,
     correct: 1,
@@ -4915,25 +5172,25 @@ sendGameData({
 // DO NOT remove the structure (if / else blocks)
 // unless you understand accuracy calculation.
 // =============================================
-    let archivistLine = "";
-    if(accuracy >= 90){
-        archivistLine = "You have mastered the Protocol. The agents move because you understand the incentives.";
-    }
-    else if(accuracy >= 75){
-        archivistLine = "You read the system well enough to survive. But hidden risk and hidden action still have teeth.";
-    }
-    else{
-        archivistLine = "You survived the Protocol. Barely. The system is not finished with you.";
-    }
+let archivistLine = "";
+if(accuracy >= 90){
+    archivistLine = "You have mastered the Market Gate. Tradeoffs, signals, and market forces move clearly before you.";
+}
+else if(accuracy >= 75){
+    archivistLine = "You read the market well enough to advance. But opportunity cost, shifting curves, and policy distortions can still catch you slipping.";
+}
+else{
+    archivistLine = "You survived the Market Gate. Barely. The market gave you answers, and you tried to bargain with them. Bad move.";
+}
 
-    let lineColor = "#38bdf8";
+let lineColor = "#38bdf8"; // market blue
 
-    if(accuracy >= 90){
-        lineColor = "#f0c86a"; // gold
-    }
-    else if(accuracy < 75){
+if(accuracy >= 90){
+    lineColor = "#f0c86a"; // gold
+}
+else if(accuracy < 75){
     lineColor = "#b91c1c"; // red
-    }
+}
 
     const gameBox = document.getElementById("gameBox");
 
@@ -4952,7 +5209,7 @@ sendGameData({
    gameBox.innerHTML = `
     <div style="text-align:center; padding:30px;">
         <h1 class="victory" style="color:#f0c86a; text-shadow:0 0 18px rgba(240,200,106,0.9), 0 0 34px rgba(56,189,248,0.35); letter-spacing:2px;">
-            PROTOCOL COMPLETE
+            GATE OPENED
         </h1>
 
         <div style="margin:20px 0; padding:16px; background:rgba(5,10,18,0.82); border-radius:10px; border:1px solid rgba(240,200,106,0.35); box-shadow:0 0 24px rgba(0,0,0,0.65), inset 0 0 22px rgba(56,189,248,0.08);">
@@ -5087,13 +5344,14 @@ function copyResults() {
     const code = document.getElementById("vCode").innerText;
     const accuracy = Math.round((correctAnswers / totalAttempts) * 100);
 
-    const shareText = `Agent: ${username}
-        Time: ${timeString}
-        Accuracy: ${accuracy}%
-        Best Streak: ${maxStreak}
-        Total Questions: ${totalAttempts}
-        Code: ${code}
-        Verified by The Principal`;
+    const shareText = `Market Gate Run
+Student: ${username}
+Time: ${timeString}
+Accuracy: ${accuracy}%
+Best Streak: ${maxStreak}
+Total Questions: ${totalAttempts}
+Code: ${code}
+Verified by The Appraiser`;
 
     navigator.clipboard.writeText(shareText).then(() => {
         const btn = document.getElementById("shareBtn");
@@ -5117,10 +5375,10 @@ function sendGameData(data) {
     token: data.token || "",
     version: "Agency-ms-telemetry-v1",
     userAgent: navigator.userAgent || "",
-    game: data.game || "The Agency Protocol",
+    game: data.game || "The Market Gate",
     event: data.event || "",
     user: data.user || username || "anonymous",
-	  email: studentEmail || "",  
+	email: studentEmail || "",  
     room: Number(data.room ?? 0),
     questionId: Number(data.questionId ?? data.question ?? 0),
     correct: Number(data.correct ?? 0),
