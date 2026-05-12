@@ -3228,10 +3228,12 @@ function startGame() {
     localStorage.setItem("gauntletUser", username);
     localStorage.setItem("gauntletRunID", runID);
 
+const hasSavedRun = loadSavedGame();
+	
     sendGameData({
         runID: runID,
         game: "The Market Gate",
-        event: "start",
+        event: hasSavedRun ? "resume" : "start",
         user: username,
         email: studentEmail
     });
@@ -3240,7 +3242,7 @@ function startGame() {
 // RESET CORE GAME STATE — DO NOT MODIFY STRUCTURE
 // =============================================
 // Resets all progression, scoring, and adaptive tracking
-const hasSavedRun = loadSavedGame();
+
 if(!hasSavedRun){
 	room = 1;
     bossHealth = 3;
