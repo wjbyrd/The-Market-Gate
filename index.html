@@ -207,6 +207,13 @@ body::after{
     max-width:320px;
 }
 
+.secondary-start-btn{
+    margin-top: 10px;
+    background: linear-gradient(180deg, #1d4d73, #04101f);
+    border-color: rgba(247,217,130,0.56);
+    color: #f7d982;
+}
+
 /* PLACEHOLDER */
 #emailInput::placeholder,
 #username::placeholder{
@@ -1741,6 +1748,8 @@ Respect structure strictly.
     <h2 class="subtitle">Trade. Choice. Price Signals.</h2>
     <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
     <button class="start-btn" onclick="startGame()">ENTER THE MARKET</button>
+	<button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
+    CONTINUE MARKET RUN</button>
   </div>
 </div>
 
@@ -1876,6 +1885,8 @@ const hallwayImages = [
 ];
 
 let soundEnabled = true;
+
+
 
 function updateSoundToggle(){
   const button = document.getElementById("soundToggle");
@@ -3174,6 +3185,29 @@ const emailInput = document.getElementById("emailInput");
 if (savedEmail && emailInput) {
     emailInput.value = savedEmail;
 }
+
+function hasSavedGame(){
+    return !!localStorage.getItem(SAVE_KEY);
+}
+
+function showContinueButtonIfSaved(){
+    const btn = document.getElementById("continueRunBtn");
+    if(!btn) return;
+
+    btn.style.display = hasSavedGame() ? "block" : "none";
+}
+
+function startNewRun(){
+    clearSavedGame();
+    startGame(false);
+}
+
+function continueSavedRun(){
+    startGame(true);
+}
+
+showContinueButtonIfSaved();
+	 
 // =============================================
 // GAME INITIALIZATION — PARTIAL CUSTOMIZATION
 // =============================================
@@ -3202,7 +3236,7 @@ if (savedEmail && emailInput) {
 // - incorrect scoring
 // - progression bugs
 // =============================================
-function startGame() {
+function startGame(shouldResume = false) {
     let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
 
     if (!inputEmail) {
@@ -3217,26 +3251,27 @@ function startGame() {
         return;
     }
 
+   studentEmail = inputEmail;
+username = generatePseudonymFromEmail(studentEmail);
+
+const hasSavedRun = shouldResume ? loadSavedGame() : false;
+
+if(!hasSavedRun){
     bossCheckpoint = 1;
-
-    studentEmail = inputEmail;
-    username = generatePseudonymFromEmail(studentEmail);
-
     runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
-    localStorage.setItem("gauntletEmail", studentEmail);
-    localStorage.setItem("gauntletUser", username);
-    localStorage.setItem("gauntletRunID", runID);
+localStorage.setItem("gauntletEmail", studentEmail);
+localStorage.setItem("gauntletUser", username);
+localStorage.setItem("gauntletRunID", runID);
 
-const hasSavedRun = loadSavedGame();
-	
-    sendGameData({
-        runID: runID,
-        game: "The Market Gate",
-        event: hasSavedRun ? "resume" : "start",
-        user: username,
-        email: studentEmail
-    });
+sendGameData({
+    runID: runID,
+    game: "The Market Gate",
+    event: hasSavedRun ? "resume" : "start",
+    user: username,
+    email: studentEmail
+});
 
 // =============================================
 // RESET CORE GAME STATE — DO NOT MODIFY STRUCTURE
@@ -3320,7 +3355,12 @@ if(localStorage.getItem("vaultScales")){
 document.getElementById("emailInput").addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
-        startGame();
+
+        if(hasSavedGame()){
+            continueSavedRun();
+        } else {
+            startNewRun();
+        }
     }
 });
 
