@@ -2019,6 +2019,93 @@ let questionHistory = {
     finalBoss: [],
 };
 
+const SAVE_KEY = "marketGateSave_v1";
+
+function saveGameState(){
+    const saveData = {
+        room,
+        bossHealth,
+        bossCheckpoint,
+        correctAnswers,
+        totalAttempts,
+        maxStreak,
+        streak,
+        username,
+        studentEmail,
+        runID,
+        conceptMemory,
+        masteryState,
+        adaptiveMode,
+        tagHistory,
+        lastTypes,
+        usedQuestions,
+        questionHistory,
+        savedAt: Date.now(),
+
+        artifacts: {
+            vaultCompass: localStorage.getItem("vaultCompass") === "true",
+            vaultLens: localStorage.getItem("vaultLens") === "true",
+            vaultScales: localStorage.getItem("vaultScales") === "true"
+        }
+    };
+
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    localStorage.setItem("gauntletRoom", String(room));
+
+    const autosave = document.getElementById("autosave");
+    if(autosave){
+        autosave.innerText = "💾 Progress Saved Locally";
+    }
+}
+
+function loadSavedGame(){
+    const rawSave = localStorage.getItem(SAVE_KEY);
+    if(!rawSave) return false;
+
+    try {
+        const saveData = JSON.parse(rawSave);
+
+        room = Number(saveData.room || 1);
+        bossHealth = Number(saveData.bossHealth || 3);
+        bossCheckpoint = Number(saveData.bossCheckpoint || 1);
+        correctAnswers = Number(saveData.correctAnswers || 0);
+        totalAttempts = Number(saveData.totalAttempts || 0);
+        maxStreak = Number(saveData.maxStreak || 0);
+        streak = Number(saveData.streak || 0);
+
+        username = saveData.username || username || "";
+        studentEmail = saveData.studentEmail || studentEmail || "";
+        runID = saveData.runID || runID || "";
+
+        conceptMemory = saveData.conceptMemory || {};
+        masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
+        adaptiveMode = saveData.adaptiveMode || "support";
+        tagHistory = saveData.tagHistory || [];
+        lastTypes = saveData.lastTypes || [];
+
+        usedQuestions = saveData.usedQuestions || usedQuestions;
+        questionHistory = saveData.questionHistory || questionHistory;
+
+        if(saveData.artifacts?.vaultCompass) localStorage.setItem("vaultCompass", "true");
+        if(saveData.artifacts?.vaultLens) localStorage.setItem("vaultLens", "true");
+        if(saveData.artifacts?.vaultScales) localStorage.setItem("vaultScales", "true");
+
+        return true;
+    } catch(error){
+        console.warn("Saved game could not be loaded:", error);
+        localStorage.removeItem(SAVE_KEY);
+        return false;
+    }
+}
+
+function clearSavedGame(){
+    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem("gauntletRoom");
+    localStorage.removeItem("vaultCompass");
+    localStorage.removeItem("vaultLens");
+    localStorage.removeItem("vaultScales");
+}
+
 function generatePseudonymFromEmail(email) {
     const adjectives = [
         "Iron", "Crimson", "Silent", "Golden", "Shadow", "Blazing",
@@ -3153,7 +3240,9 @@ function startGame() {
 // RESET CORE GAME STATE — DO NOT MODIFY STRUCTURE
 // =============================================
 // Resets all progression, scoring, and adaptive tracking
-    room = 1;
+const hasSavedRun = loadSavedGame();
+if(!hasSavedRun){
+	room = 1;
     bossHealth = 3;
     streak = 0;
     maxStreak = 0;
@@ -3172,11 +3261,9 @@ function startGame() {
 	rapidGuessLocked = false;
 
     localStorage.removeItem("gauntletRoom");
-
-    //Market Gate artifact keys — keep these matched to your actual Market Gate IDs.
-	  localStorage.removeItem("vaultCompass");
-	  localStorage.removeItem("vaultLens");
-	  localStorage.removeItem("vaultScales");
+	localStorage.removeItem("vaultCompass");
+	localStorage.removeItem("vaultLens");
+	localStorage.removeItem("vaultScales");
 	
     questionHistory = {
         easy: [], medium: [], hard: [], elite: [], calculation: [],
@@ -4931,6 +5018,7 @@ if(room === 30){
     // AND it wasn't a Boss Room (or a Detour).
    msgElement.innerHTML = "";
    room++;
+   saveGameState();
    localStorage.setItem("gauntletRoom", room);
    showHallwayTransition(currentQuestion.feedback);
    return;
@@ -5310,17 +5398,17 @@ document.getElementById("continueBtn").onclick = () => {
     document.getElementById("gameBox").classList.remove("boss-mode");
     bossHealth = 3;
 
-	  if(bossRoom === 10) bossCheckpoint = 11;
+	if(bossRoom === 10) bossCheckpoint = 11;
     if(bossRoom === 20) bossCheckpoint = 21;
     if(bossRoom === 30) bossCheckpoint = 31;
 	
-    if(bossRoom === 30){
-        handleVictory();
-    } else {
-        room++;
-        localStorage.setItem("gauntletRoom", room);
-        loadQuestion();
-    }
+if(bossRoom === 30){
+    handleVictory();
+} else {
+    room++;
+    saveGameState();
+    loadQuestion();
+}
 };
 }
 
@@ -5401,7 +5489,8 @@ function generateCode(name, acc, streak, total){
 // This is a PRESENTATION layer, not a logic layer.
 // =============================================     
 function handleVictory() {
-    bgMusic.pause();
+    clearSavedGame();
+	bgMusic.pause();
     bossMusic.pause();
     if (typeof sfxVictory !== 'undefined') {
         sfxVictory.currentTime = 0;
