@@ -1715,7 +1715,7 @@ button:active {
 }
 
 .mode-card{
-  min-height:330px;
+  min-height:270px;
   padding:0;
   overflow:hidden;
   border-radius:18px;
@@ -1751,20 +1751,13 @@ button:active {
 
 .mode-card-title{
   display:block;
-  padding:16px 16px 6px;
+  padding:18px 16px 20px;
   font-size:22px;
   font-weight:700;
   letter-spacing:1px;
   color:#f7d982;
 }
 
-.mode-card-text{
-  display:block;
-  padding:0 16px 18px;
-  font-size:15px;
-  line-height:1.35;
-  color:rgba(224,242,254,0.82);
-}
 
 .mode-back-btn{
   margin-top:18px;
@@ -1983,20 +1976,14 @@ Respect structure strictly.
     <div class="mode-grid">
       <button class="mode-card" onclick="startSelectedMode('standard')">
         <img src="mode_standard.png" alt="Standard Campaign mode">
-        <span class="mode-card-title">Standard Campaign</span>
-        <span class="mode-card-text">Full 30-room run with bosses, artifacts, setbacks, and realm progress.</span>
       </button>
 
       <button class="mode-card" onclick="startSelectedMode('timed')">
         <img src="mode_timed.png" alt="Timed Trial mode">
-        <span class="mode-card-title">Timed Trial</span>
-        <span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back.</span>
       </button>
 
       <button class="mode-card" onclick="startSelectedMode('exam')">
         <img src="mode_exam.png" alt="Exam Drill mode">
-        <span class="mode-card-title">Exam Drill</span>
-        <span class="mode-card-text">No bosses. No artifacts. No realm progress. Just adaptive practice.</span>
       </button>
 
     </div>
