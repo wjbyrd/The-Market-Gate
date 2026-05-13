@@ -1611,6 +1611,180 @@ button:active {
   }
 }
 
+
+/* =========================================
+   13. MODE SELECT + TIMED TRIAL HUD
+========================================= */
+
+.mode-select-screen{
+  position:fixed;
+  inset:0;
+  z-index:110;
+  align-items:center;
+  justify-content:center;
+  padding:30px;
+  background:
+    linear-gradient(rgba(2,6,23,0.42), rgba(2,6,23,0.78)),
+    url('start screen image.png');
+  background-size:cover;
+  background-position:center;
+}
+
+.mode-select-panel{
+  width:min(1100px, 100%);
+  padding:28px;
+  border-radius:20px;
+  background:rgba(2,8,18,0.84);
+  border:1px solid rgba(247,217,130,0.34);
+  box-shadow:
+    0 0 36px rgba(0,0,0,0.82),
+    0 0 44px rgba(56,189,248,0.18),
+    inset 0 0 36px rgba(0,0,0,0.62);
+  text-align:center;
+}
+
+.mode-title{
+  margin:0;
+  font-size:clamp(38px, 5vw, 68px);
+  letter-spacing:4px;
+  color:#f7d982;
+  text-shadow:
+    0 0 14px rgba(247,217,130,0.68),
+    0 0 28px rgba(56,189,248,0.24),
+    0 3px 8px rgba(0,0,0,0.9);
+}
+
+.mode-subtitle{
+  margin:8px auto 26px;
+  color:#c7ecff;
+  font-size:20px;
+}
+
+.mode-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:18px;
+}
+
+.mode-card{
+  min-height:330px;
+  padding:0;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(56,189,248,0.30);
+  background:rgba(3,10,24,0.94);
+  color:#eef6ff;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  text-align:left;
+  box-shadow:
+    0 0 22px rgba(0,0,0,0.68),
+    inset 0 0 18px rgba(0,0,0,0.58);
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.mode-card:hover{
+  transform:translateY(-6px) scale(1.02);
+  border-color:rgba(247,217,130,0.78);
+  box-shadow:
+    0 0 28px rgba(56,189,248,0.32),
+    0 0 38px rgba(247,217,130,0.20),
+    inset 0 0 18px rgba(0,0,0,0.62);
+}
+
+.mode-card img{
+  width:100%;
+  height:190px;
+  object-fit:cover;
+  border-bottom:1px solid rgba(247,217,130,0.22);
+  background:linear-gradient(180deg, rgba(11,34,56,0.95), rgba(2,6,23,0.98));
+}
+
+.mode-card-title{
+  display:block;
+  padding:16px 16px 6px;
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:#f7d982;
+}
+
+.mode-card-text{
+  display:block;
+  padding:0 16px 18px;
+  font-size:15px;
+  line-height:1.35;
+  color:rgba(224,242,254,0.82);
+}
+
+.mode-back-btn{
+  margin-top:18px;
+  min-width:140px;
+}
+
+.timed-mode-hud{
+  margin: 8px auto 12px;
+  padding: 8px 14px;
+  width: fit-content;
+  border-radius: 999px;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(11,34,56,0.88), rgba(2,6,23,0.96));
+  border: 1px solid rgba(247,217,130,0.48);
+  box-shadow:
+    0 0 16px rgba(56,189,248,0.24),
+    0 0 26px rgba(247,217,130,0.14),
+    inset 0 0 12px rgba(0,0,0,0.72);
+}
+
+.timer-label{
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #c7ecff;
+}
+
+.timer-display{
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #f7d982;
+  text-shadow:
+    0 0 10px rgba(247,217,130,0.62),
+    0 0 18px rgba(56,189,248,0.24);
+}
+
+.timer-warning{
+  animation: timerWarningPulse .75s ease-in-out infinite alternate;
+}
+
+@keyframes timerWarningPulse{
+  from{ transform: scale(1); }
+  to{
+    transform: scale(1.08);
+    text-shadow:
+      0 0 14px rgba(248,113,113,0.90),
+      0 0 24px rgba(247,217,130,0.42);
+  }
+}
+
+@media(max-width:900px){
+  .mode-grid{ grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:560px){
+  .mode-select-screen{
+    padding:14px;
+    align-items:flex-start;
+    overflow-y:auto;
+  }
+
+  .mode-grid{ grid-template-columns:1fr; }
+  .mode-card{ min-height:250px; }
+  .mode-card img{ height:145px; }
+}
+
 /* =========================================
    13. SOUND ON/OFF — THE MARKET GATE
 ========================================= */
@@ -1747,9 +1921,39 @@ Respect structure strictly.
     <h1 class="title">THE MARKET GATE</h1>
     <h2 class="subtitle">Trade. Choice. Price Signals.</h2>
     <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
-    <button class="start-btn" onclick="startGame()">ENTER THE MARKET</button>
+    <button class="start-btn" onclick="showModeSelect()">ENTER THE MARKET</button>
 	<button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
-    CONTINUE MARKET RUN</button>
+    CONTINUE STANDARD RUN</button>
+  </div>
+</div>
+
+<div id="modeSelectScreen" class="mode-select-screen" style="display:none;">
+  <div class="mode-select-panel">
+    <h1 class="mode-title">CHOOSE YOUR BATTLE</h1>
+    <p class="mode-subtitle">Select how you want to enter The Market Gate.</p>
+
+    <div class="mode-grid">
+      <button class="mode-card" onclick="startSelectedMode('standard')">
+        <img src="mode_standard.png" alt="Standard Campaign mode">
+        <span class="mode-card-title">Standard Campaign</span>
+        <span class="mode-card-text">Full 30-room run with bosses, artifacts, setbacks, and realm progress.</span>
+      </button>
+
+      <button class="mode-card" onclick="startSelectedMode('timed')">
+        <img src="mode_timed.png" alt="Timed Trial mode">
+        <span class="mode-card-title">Timed Trial</span>
+        <span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back.</span>
+      </button>
+
+      <button class="mode-card" onclick="startSelectedMode('exam')">
+        <img src="mode_exam.png" alt="Exam Drill mode">
+        <span class="mode-card-title">Exam Drill</span>
+        <span class="mode-card-text">No bosses. No artifacts. No realm progress. Just adaptive practice.</span>
+      </button>
+
+    </div>
+
+    <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
   </div>
 </div>
 
@@ -1823,6 +2027,12 @@ DO NOT REMOVE:
             </div>
 
             <div id="streakDisplay"></div>
+
+            <div id="timedModeHud" class="timed-mode-hud" style="display:none;">
+                <span class="timer-label">Timed Trial</span>
+                <span id="timerDisplay" class="timer-display">10:00</span>
+            </div>
+
             <p id="bossMessage"></p>
 
             <div id="questionContainer">
@@ -2037,7 +2247,42 @@ const REALM_COMPLETE_KEY = "economicRealm_marketGate_complete";
 const REALM_STATUS_KEY = "economicRealm_marketGate_status";
 const REALM_ROOM_KEY = "economicRealm_marketGate_room";
 
+let gameMode = "standard";
+let timedModeDurationMs = 10 * 60 * 1000;
+let timedModeEndTime = null;
+let timedModeTimerInterval = null;
+let timedHighestRoom = 1;
+let timedSetbacks = 0;
+
+function modeAllowsSave(){
+    return gameMode === "standard";
+}
+
+function modeAllowsRealmProgress(){
+    return gameMode === "standard";
+}
+
+function getSaveKey(){
+    return `${SAVE_KEY}_${gameMode || "standard"}`;
+}
+
+function isBossRoomForMode(r){
+    if(gameMode === "exam") return false;
+    if(gameMode === "timed") return false;
+    if(gameMode === "bossRush") return true;
+    return r === 10 || r === 20 || r === 30;
+}
+
+function getModeDisplayName(){
+    if(gameMode === "timed") return "Timed Trial";
+    if(gameMode === "exam") return "Exam Drill";
+    if(gameMode === "bossRush") return "Boss Rush";
+    return "Standard Campaign";
+}
+
 function saveGameState(){
+    if(!modeAllowsSave()) return;
+
     const saveData = {
         room,
         bossHealth,
@@ -2049,6 +2294,7 @@ function saveGameState(){
         username,
         studentEmail,
         runID,
+        gameMode,
         conceptMemory,
         masteryState,
         adaptiveMode,
@@ -2065,11 +2311,14 @@ function saveGameState(){
         }
     };
 
-    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
     localStorage.setItem("gauntletRoom", String(room));
-	localStorage.setItem(REALM_STARTED_KEY, "true");
-	localStorage.setItem(REALM_STATUS_KEY, "contested");
-	localStorage.setItem(REALM_ROOM_KEY, String(room));
+
+    if(modeAllowsRealmProgress()){
+	    localStorage.setItem(REALM_STARTED_KEY, "true");
+	    localStorage.setItem(REALM_STATUS_KEY, "contested");
+	    localStorage.setItem(REALM_ROOM_KEY, String(room));
+    }
 
     const autosave = document.getElementById("autosave");
     if(autosave){
@@ -2078,7 +2327,7 @@ function saveGameState(){
 }
 
 function loadSavedGame(){
-    const rawSave = localStorage.getItem(SAVE_KEY);
+    const rawSave = localStorage.getItem(getSaveKey());
     if(!rawSave) return false;
 
     try {
@@ -2095,6 +2344,7 @@ function loadSavedGame(){
         username = saveData.username || username || "";
         studentEmail = saveData.studentEmail || studentEmail || "";
         runID = saveData.runID || runID || "";
+        gameMode = saveData.gameMode || gameMode || "standard";
 
         conceptMemory = saveData.conceptMemory || {};
         masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
@@ -2112,17 +2362,20 @@ function loadSavedGame(){
         return true;
     } catch(error){
         console.warn("Saved game could not be loaded:", error);
-        localStorage.removeItem(SAVE_KEY);
+        localStorage.removeItem(getSaveKey());
         return false;
     }
 }
 
 function clearSavedGame(){
-    localStorage.removeItem(SAVE_KEY);
-    localStorage.removeItem("gauntletRoom");
-    localStorage.removeItem("vaultCompass");
-    localStorage.removeItem("vaultLens");
-    localStorage.removeItem("vaultScales");
+    localStorage.removeItem(getSaveKey());
+
+    if(modeAllowsSave()){
+        localStorage.removeItem("gauntletRoom");
+        localStorage.removeItem("vaultCompass");
+        localStorage.removeItem("vaultLens");
+        localStorage.removeItem("vaultScales");
+    }
 }
 
 function generatePseudonymFromEmail(email) {
@@ -3253,9 +3506,60 @@ if (savedEmail && emailInput) {
     emailInput.value = savedEmail;
 }
 
-function hasSavedGame(){
-    return !!localStorage.getItem(SAVE_KEY);
+function hasSavedGame(mode = "standard"){
+    return !!localStorage.getItem(`${SAVE_KEY}_${mode}`);
 }
+
+function validateAndStoreEmailForModeSelect(){
+    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
+
+    if (!inputEmail) {
+        alert("An email is required to enter the Gate.");
+        return false;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(inputEmail)) {
+        alert("Enter a valid email address.");
+        return false;
+    }
+
+    studentEmail = inputEmail;
+    username = generatePseudonymFromEmail(studentEmail);
+
+    localStorage.setItem("gauntletEmail", studentEmail);
+    localStorage.setItem("gauntletUser", username);
+
+    return true;
+}
+
+function showModeSelect(){
+    if(!validateAndStoreEmailForModeSelect()) return;
+
+    document.getElementById("startScreen").style.display = "none";
+    const modeScreen = document.getElementById("modeSelectScreen");
+    if(modeScreen) modeScreen.style.display = "flex";
+}
+
+function returnToTitleScreen(){
+    const modeScreen = document.getElementById("modeSelectScreen");
+    if(modeScreen) modeScreen.style.display = "none";
+    document.getElementById("startScreen").style.display = "flex";
+    showContinueButtonIfSaved();
+}
+
+function startSelectedMode(mode){
+    gameMode = mode || "standard";
+    localStorage.setItem("marketGateCurrentMode", gameMode);
+
+    const modeScreen = document.getElementById("modeSelectScreen");
+    if(modeScreen) modeScreen.style.display = "none";
+
+    clearSavedGame();
+    startGame(false);
+}
+
 
 function showContinueButtonIfSaved(){
     const btn = document.getElementById("continueRunBtn");
@@ -3265,11 +3569,13 @@ function showContinueButtonIfSaved(){
 }
 
 function startNewRun(){
+    gameMode = "standard";
     clearSavedGame();
     startGame(false);
 }
 
 function continueSavedRun(){
+    gameMode = "standard";
     startGame(true);
 }
 
@@ -3331,9 +3637,11 @@ if(!hasSavedRun){
 localStorage.setItem("gauntletEmail", studentEmail);
 localStorage.setItem("gauntletUser", username);
 localStorage.setItem("gauntletRunID", runID);
-localStorage.setItem(REALM_STARTED_KEY, "true");
-localStorage.setItem(REALM_STATUS_KEY, "contested");
-localStorage.setItem(REALM_ROOM_KEY, String(room || 1));
+if(modeAllowsRealmProgress()){
+    localStorage.setItem(REALM_STARTED_KEY, "true");
+    localStorage.setItem(REALM_STATUS_KEY, "contested");
+    localStorage.setItem(REALM_ROOM_KEY, String(room || 1));
+}
 	
 sendGameData({
     runID: runID,
@@ -3367,13 +3675,17 @@ if(!hasSavedRun){
 	rapidGuessWarnings = 0;
 	rapidGuessLocked = false;
 
-    localStorage.removeItem("gauntletRoom");
-	localStorage.removeItem("vaultCompass");
-	localStorage.removeItem("vaultLens");
-	localStorage.removeItem("vaultScales");
-	localStorage.removeItem(REALM_COMPLETE_KEY);
-	localStorage.setItem(REALM_STATUS_KEY, "contested");
-	localStorage.setItem(REALM_ROOM_KEY, "1");
+    if(modeAllowsSave()){
+        localStorage.removeItem("gauntletRoom");
+	    localStorage.removeItem("vaultCompass");
+	    localStorage.removeItem("vaultLens");
+	    localStorage.removeItem("vaultScales");
+    }
+	if(modeAllowsRealmProgress()){
+	    localStorage.removeItem(REALM_COMPLETE_KEY);
+	    localStorage.setItem(REALM_STATUS_KEY, "contested");
+	    localStorage.setItem(REALM_ROOM_KEY, "1");
+	}
 	
     questionHistory = {
         easy: [], medium: [], hard: [], elite: [], calculation: [],
@@ -3391,6 +3703,8 @@ if(!hasSavedRun){
 // =============================================
 // Shows main game elements and restores vault visuals
     document.getElementById("startScreen").style.display = "none";
+    const modeScreen = document.getElementById("modeSelectScreen");
+    if(modeScreen) modeScreen.style.display = "none";
     document.getElementById("gameBox").style.display = "block";
     document.getElementById("artifactVault").style.display = "block";
     document.querySelectorAll(".torch").forEach(t => t.style.display = "block");
@@ -3414,11 +3728,221 @@ if(localStorage.getItem("vaultScales")){
 }
   
 // Start game loop: music + timer + first question
+    initializeRunForMode(gameMode);
     bgMusic.play().catch(e => console.log("Audio started"));
     startTime = Date.now(); 
     loadQuestion();
 }
 	 
+
+function resetRunStateForNewMode(){
+    room = 1;
+    bossHealth = 3;
+    bossCheckpoint = 1;
+    streak = 0;
+    maxStreak = 0;
+    totalAttempts = 0;
+    correctAnswers = 0;
+    bossPool = [];
+    if(typeof calcBag !== "undefined") calcBag = [];
+    conceptMemory = {};
+    masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
+    tagHistory = [];
+    lastTypes = [];
+    adaptiveMode = "support";
+    resetRemediationState();
+    rapidGuessHistory = [];
+    rapidGuessWarnings = 0;
+    rapidGuessLocked = false;
+    timedHighestRoom = 1;
+    timedSetbacks = 0;
+
+    questionHistory = {
+        easy: [], medium: [], hard: [], elite: [], calculation: [],
+        easyBoss: [], mediumBoss: [], finalBoss: []
+    };
+
+    usedQuestions = {
+        easy: [], medium: [], hard: [], elite: [],
+        easyBoss: [], mediumBoss: [], finalBoss: []
+    };
+}
+
+function initializeRunForMode(mode){
+    gameMode = mode || "standard";
+
+    const autosave = document.getElementById("autosave");
+    if(autosave){
+        autosave.innerText = gameMode === "timed"
+            ? "⏱ Timed Trial Active"
+            : gameMode === "exam"
+                ? "✎ Exam Drill Active"
+                : gameMode === "bossRush"
+                    ? "⚔ Boss Rush Active"
+                    : "💾 Market Signal Preserved";
+    }
+
+    if(gameMode === "timed"){
+        startTimedModeClock();
+    } else {
+        stopTimedModeClock();
+    }
+}
+
+function startTimedModeClock(){
+    timedModeEndTime = Date.now() + timedModeDurationMs;
+
+    const hud = document.getElementById("timedModeHud");
+    if(hud) hud.style.display = "flex";
+
+    updateTimedModeClock();
+
+    if(timedModeTimerInterval){
+        clearInterval(timedModeTimerInterval);
+    }
+
+    timedModeTimerInterval = setInterval(updateTimedModeClock, 250);
+}
+
+function stopTimedModeClock(){
+    if(timedModeTimerInterval){
+        clearInterval(timedModeTimerInterval);
+        timedModeTimerInterval = null;
+    }
+
+    const hud = document.getElementById("timedModeHud");
+    if(hud) hud.style.display = "none";
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    if(timerDisplay){
+        timerDisplay.classList.remove("timer-warning");
+        timerDisplay.innerText = "10:00";
+    }
+}
+
+function updateTimedModeClock(){
+    if(gameMode !== "timed" || !timedModeEndTime) return;
+
+    const remainingMs = Math.max(0, timedModeEndTime - Date.now());
+    const totalSeconds = Math.ceil(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    if(timerDisplay){
+        timerDisplay.innerText = `${minutes}:${String(seconds).padStart(2, "0")}`;
+        timerDisplay.classList.toggle("timer-warning", remainingMs <= 60 * 1000);
+    }
+
+    if(remainingMs <= 0){
+        endTimedModeRun();
+    }
+}
+
+function endTimedModeRun(){
+    if(gameMode !== "timed") return;
+
+    stopTimedModeClock();
+    gameMode = "timed-complete";
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    const bestRoom = Number(localStorage.getItem("marketGateTimedBestRoom") || 0);
+    if(timedHighestRoom > bestRoom){
+        localStorage.setItem("marketGateTimedBestRoom", String(timedHighestRoom));
+    }
+
+    localStorage.setItem("marketGateTimedLastRoom", String(room));
+    localStorage.setItem("marketGateTimedLastHighestRoom", String(timedHighestRoom));
+    localStorage.setItem("marketGateTimedLastAccuracy", String(accuracy));
+    localStorage.setItem("marketGateTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("marketGateTimedLastStreak", String(maxStreak));
+    localStorage.setItem("marketGateTimedLastSetbacks", String(timedSetbacks));
+
+    sendGameData({
+        runID: runID,
+        game: "The Market Gate",
+        event: "timed_complete",
+        user: username,
+        email: studentEmail,
+        room: room,
+        questionId: 0,
+        correct: 1,
+        tag: "",
+        type: "",
+        objective: "",
+        responseTime: 0,
+        attempt: totalAttempts,
+        streak: streak,
+        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        adaptiveMode: "timed_complete",
+        totalTime: timedModeDurationMs,
+        accuracy: accuracy / 100,
+        maxStreak: maxStreak,
+        totalAttempts: totalAttempts
+    });
+
+    document.getElementById("bossMessage").innerText = "";
+    document.getElementById("formulaHint").innerText = "";
+    document.getElementById("artifactDrop").style.display = "none";
+    document.getElementById("questionImageBox").style.display = "none";
+
+    document.getElementById("question").innerHTML = `
+        <span class="boss-title">TIME EXPIRED</span>
+        <div class="boss-q">
+            You reached as far as Room ${timedHighestRoom}.<br><br>
+            Final Room: ${room}<br>
+            Accuracy: ${accuracy}%<br>
+            Total Attempts: ${totalAttempts}<br>
+            Best Streak: ${maxStreak}<br>
+            Setbacks Taken: ${timedSetbacks}
+        </div>
+    `;
+
+    document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
+        <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
+    `;
+
+    document.getElementById("message").innerText = "The trial ends. The market remembers.";
+}
+
+function restartTimedMode(){
+    gameMode = "timed";
+    resetRunStateForNewMode();
+    startSelectedMode("timed");
+}
+
+function returnToModeSelectFromRun(){
+    stopTimedModeClock();
+    document.getElementById("gameBox").style.display = "none";
+    document.getElementById("artifactVault").style.display = "none";
+    document.getElementById("modeSelectScreen").style.display = "flex";
+}
+
+function getDifficultyForMode(){
+    if(gameMode === "exam" || gameMode === "timed"){
+        return (room <= 10) ? "easy"
+            : (room <= 20) ? "medium"
+            : "hard";
+    }
+
+    if(gameMode === "bossRush"){
+        return (room <= 10) ? "easyBoss"
+            : (room <= 20) ? "mediumBoss"
+            : "finalBoss";
+    }
+
+    return (room <= 9) ? "easy"
+         : (room === 10) ? "easyBoss"
+         : (room <= 19) ? "medium"
+         : (room === 20) ? "mediumBoss"
+         : (room <= 29) ? "hard"
+         : "finalBoss";
+}
+
 // =============================================
 // INPUT SHORTCUT — SAFE TO KEEP OR REMOVE
 // =============================================
@@ -3429,10 +3953,10 @@ document.getElementById("emailInput").addEventListener("keypress", function(even
     if (event.key === "Enter") {
         event.preventDefault();
 
-        if(hasSavedGame()){
+        if(hasSavedGame("standard")){
             continueSavedRun();
         } else {
-            startNewRun();
+            showModeSelect();
         }
     }
 });
@@ -4548,6 +5072,16 @@ function playFinalBossMusic(){
 // Changing logic here will break progression.
      
 function loadQuestion() {
+    if(gameMode === "timed" && timedModeEndTime && Date.now() >= timedModeEndTime){
+        endTimedModeRun();
+        return;
+    }
+
+    if((gameMode === "timed" || gameMode === "exam") && room > 30){
+        handlePracticeModeComplete();
+        return;
+    }
+
     questionStartTime = Date.now(); 
     updateMazeTrack();
     const questionElement = document.getElementById("question");
@@ -4562,14 +5096,9 @@ function loadQuestion() {
 	imageBox.style.display = "none";
 
     // 1. Determine Difficulty and Boss Status
-	let diff = (room <= 9) ? "easy"
-         : (room === 10) ? "easyBoss"
-         : (room <= 19) ? "medium"
-         : (room === 20) ? "mediumBoss"
-         : (room <= 29) ? "hard"
-         : "finalBoss";
+	let diff = getDifficultyForMode();
 
-   const isBoss = diff.includes("Boss");
+   const isBoss = diff.includes("Boss") && gameMode !== "exam" && gameMode !== "timed";
 
    // Only reset health if the bossPool is currently empty (meaning a new encounter)
      if (isBoss && (!bossPool || bossPool.length === 0)) {
@@ -4594,9 +5123,10 @@ function loadQuestion() {
     gameBox.classList.toggle("boss-mode", isBoss);
    
     // 2. UI & Progress Updates
-    document.getElementById("progressFill").style.width = (room / 30 * 100) + "%";
-    document.getElementById("areaDisplay").innerText = `${getAreaName(room)} (${room}/30)`;
-    document.getElementById("srAnnouncements").innerText = `Entering ${getAreaName(room)}. Room ${room} of 30.`;
+    document.getElementById("progressFill").style.width = (Math.min(room, 30) / 30 * 100) + "%";
+    const roomCap = (gameMode === "timed" || gameMode === "exam") ? Math.min(room, 30) : room;
+    document.getElementById("areaDisplay").innerText = `${getModeDisplayName()} — ${getAreaName(roomCap)} (${roomCap}/30)`;
+    document.getElementById("srAnnouncements").innerText = `Entering ${getModeDisplayName()}. ${getAreaName(roomCap)}. Room ${roomCap} of 30.`;
 
     // 3. Select the Question (CHANGE BOSS NAMES AND PNG)
     if (isBoss) {
@@ -4746,7 +5276,7 @@ if(currentQuestion.image){
     wizardSpeak(wizardText);
 
     // --- UI ---
-    bossMsg.innerText = (room === 9 || room === 19 || room === 29)
+    bossMsg.innerText = (gameMode === "standard" && (room === 9 || room === 19 || room === 29))
         ? "⚠️ DANGER: BOSS DETECTED IN NEXT ROOM ⚠️"
         : "";
     bossMsg.style.color = "#ef4444";
@@ -4869,7 +5399,7 @@ function answer(choice) {
    
     totalAttempts++;
    
-    const isBossRoom = (room === 10 || room === 20 || room === 30);
+    const isBossRoom = isBossRoomForMode(room);
     const msgElement = document.getElementById("message");
     const wizard = document.getElementById("wizardImage");
 const isCorrect = (choice === currentQuestion.a);
@@ -5106,22 +5636,24 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
          bossPool = [];
            
        // Boss defeated — Market Gate boss artifacts
-if(room === 10){
-    document.getElementById("vaultCompass").classList.add("unlocked");
-    localStorage.setItem("vaultCompass", "true");
-    showArtifact(artifacts.compass.img, artifacts.compass.title, artifacts.compass.text);
-}
+if(modeAllowsRealmProgress()){
+    if(room === 10){
+        document.getElementById("vaultCompass").classList.add("unlocked");
+        localStorage.setItem("vaultCompass", "true");
+        showArtifact(artifacts.compass.img, artifacts.compass.title, artifacts.compass.text);
+    }
 
-if(room === 20){
-    document.getElementById("vaultLens").classList.add("unlocked");
-    localStorage.setItem("vaultLens", "true");
-    showArtifact(artifacts.lens.img, artifacts.lens.title, artifacts.lens.text);
-}
+    if(room === 20){
+        document.getElementById("vaultLens").classList.add("unlocked");
+        localStorage.setItem("vaultLens", "true");
+        showArtifact(artifacts.lens.img, artifacts.lens.title, artifacts.lens.text);
+    }
 
-if(room === 30){
-    document.getElementById("vaultScales").classList.add("unlocked");
-    localStorage.setItem("vaultScales", "true");
-    showArtifact(artifacts.scales.img, artifacts.scales.title, artifacts.scales.text);
+    if(room === 30){
+        document.getElementById("vaultScales").classList.add("unlocked");
+        localStorage.setItem("vaultScales", "true");
+        showArtifact(artifacts.scales.img, artifacts.scales.title, artifacts.scales.text);
+    }
 }
 
 // ... (Inside the Boss Victory check)
@@ -5136,8 +5668,15 @@ if(room === 30){
     // AND it wasn't a Boss Room (or a Detour).
    msgElement.innerHTML = "";
    room++;
+   timedHighestRoom = Math.max(timedHighestRoom, room);
    saveGameState();
    localStorage.setItem("gauntletRoom", room);
+
+   if(gameMode === "timed" && timedModeEndTime && Date.now() >= timedModeEndTime){
+       endTimedModeRun();
+       return;
+   }
+
    showHallwayTransition(currentQuestion.feedback);
    return;
     }      
@@ -5253,6 +5792,7 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
 
 // Never fall back behind the most recently cleared boss gate
 	room = Math.max(bossCheckpoint, newRoom);
+    if(gameMode === "timed") timedSetbacks++;
 
     localStorage.setItem("gauntletRoom", room);
 
@@ -5545,6 +6085,58 @@ if(bossRoom === 30){
 };
 }
 
+
+function handlePracticeModeComplete(){
+    stopTimedModeClock();
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    sendGameData({
+        runID: runID,
+        game: "The Market Gate",
+        event: `${gameMode}_complete`,
+        user: username,
+        email: studentEmail,
+        room: room,
+        questionId: 0,
+        correct: 1,
+        tag: "",
+        type: "",
+        objective: "",
+        responseTime: 0,
+        attempt: totalAttempts,
+        streak: streak,
+        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        adaptiveMode: `${gameMode}_complete`,
+        totalTime: startTime ? (Date.now() - startTime) : 0,
+        accuracy: accuracy / 100,
+        maxStreak: maxStreak,
+        totalAttempts: totalAttempts
+    });
+
+    document.getElementById("bossMessage").innerText = "";
+    document.getElementById("formulaHint").innerText = "";
+    document.getElementById("artifactDrop").style.display = "none";
+
+    document.getElementById("question").innerHTML = `
+        <span class="boss-title">${getModeDisplayName().toUpperCase()} COMPLETE</span>
+        <div class="boss-q">
+            You reached the end of this practice path.<br><br>
+            Accuracy: ${accuracy}%<br>
+            Total Attempts: ${totalAttempts}<br>
+            Best Streak: ${maxStreak}
+        </div>
+    `;
+
+    document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
+    `;
+
+    document.getElementById("message").innerText = "Practice complete. The campaign record was not changed.";
+}
+
 // =============================================
 // COMPLETION CODE GENERATOR — DO NOT MODIFY
 // =============================================
@@ -5622,6 +6214,11 @@ function generateCode(name, acc, streak, total){
 // This is a PRESENTATION layer, not a logic layer.
 // =============================================     
 function handleVictory() {
+    if(!modeAllowsRealmProgress()){
+        handlePracticeModeComplete();
+        return;
+    }
+
     localStorage.setItem(REALM_STARTED_KEY, "true");
 	localStorage.setItem(REALM_COMPLETE_KEY, "true");
 	localStorage.setItem(REALM_STATUS_KEY, "restored");
@@ -5880,6 +6477,7 @@ function sendGameData(data) {
     version: "Gate-ms-telemetry-v3.5",
     userAgent: navigator.userAgent || "",
     game: data.game || "The Market Gate",
+    mode: data.mode || gameMode || "standard",
     event: data.event || "",
     user: data.user || username || "anonymous",
 	email: studentEmail || "",  
@@ -5926,6 +6524,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
