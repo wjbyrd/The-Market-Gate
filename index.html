@@ -2031,6 +2031,11 @@ let questionHistory = {
 };
 
 const SAVE_KEY = "marketGateSave_v1";
+const REALM_MISSION_KEY = "marketGate";
+const REALM_STARTED_KEY = "economicRealm_marketGate_started";
+const REALM_COMPLETE_KEY = "economicRealm_marketGate_complete";
+const REALM_STATUS_KEY = "economicRealm_marketGate_status";
+const REALM_ROOM_KEY = "economicRealm_marketGate_room";
 
 function saveGameState(){
     const saveData = {
@@ -2062,6 +2067,9 @@ function saveGameState(){
 
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     localStorage.setItem("gauntletRoom", String(room));
+	localStorage.setItem(REALM_STARTED_KEY, "true");
+	localStorage.setItem(REALM_STATUS_KEY, "contested");
+	localStorage.setItem(REALM_ROOM_KEY, String(room));
 
     const autosave = document.getElementById("autosave");
     if(autosave){
@@ -2822,6 +2830,26 @@ function getRemediationStageLabel(stage){
     return "Recovery Retest";
 }
 
+function getRecoveryLine(stage){
+  if(stage === "repair"){
+    return "Recovery Chamber opened. The system is isolating the broken signal.";
+  }
+
+  if(stage === "bridge"){
+    return "Bridge Trial active. Apply the concept before the Gate lets you advance.";
+  }
+
+  if(stage === "retest"){
+    return "Retest Gate reopened. Same weakness. Less cover.";
+  }
+
+  if(stage === "miss"){
+    return "The signal is still unstable. Repair the weakness before advancing.";
+  }
+
+  return "Recovery confirmed. Return to the Market Gate.";
+}
+
 function getQuestionsMatchingNeed(pool, objectiveKey, tag, excludeIds = [], skillKey = null){
     if(!Array.isArray(pool) || pool.length === 0) return [];
 
@@ -3164,6 +3192,43 @@ const artifacts = {
         text: "The scales weigh shortage against surplus. When prices are held away from equilibrium, imbalance takes hold."
     }
 };
+
+function getMarketGateBossName(){
+  if(room === 10) return "Frontier Keeper";
+  if(room === 20) return "Signal Broker";
+  if(room === 30) return "Price Magistrate";
+  return "The Gate";
+}
+
+function getMarketGateBossLine({ isCorrect, tag, type, objective, streak, bossHealth, responseTime }) {
+  const bossName = getMarketGateBossName();
+
+  if(isCorrect && streak >= 5){
+    return `${bossName}: Your streak rises. Now let’s see if your reasoning survives pressure.`;
+  }
+
+  if(isCorrect && bossHealth <= 2){
+    return `${bossName}: Clean strike. The signal weakens.`;
+  }
+
+  if(!isCorrect && responseTime < 5000){
+    return `${bossName}: Fast is not fluent. Read the signal.`;
+  }
+
+  if(!isCorrect && (type === "graph" || type === "graph-integration")){
+    return `${bossName}: The curve moved. You didn’t.`;
+  }
+
+  if(!isCorrect && tag){
+    return `${bossName}: The weakness is visible: ${tag}. The Gate will test it again.`;
+  }
+
+  if(isCorrect){
+    return `${bossName}: Correct. But one answer does not restore the market.`;
+  }
+
+  return `${bossName}: The checkpoint holds. Try again.`;
+}
   
 // =============================================
 // USERNAME RESTORE — SAFE TO MODIFY
@@ -3266,7 +3331,10 @@ if(!hasSavedRun){
 localStorage.setItem("gauntletEmail", studentEmail);
 localStorage.setItem("gauntletUser", username);
 localStorage.setItem("gauntletRunID", runID);
-
+localStorage.setItem(REALM_STARTED_KEY, "true");
+localStorage.setItem(REALM_STATUS_KEY, "contested");
+localStorage.setItem(REALM_ROOM_KEY, String(room || 1));
+	
 sendGameData({
     runID: runID,
     game: "The Market Gate",
@@ -3303,6 +3371,9 @@ if(!hasSavedRun){
 	localStorage.removeItem("vaultCompass");
 	localStorage.removeItem("vaultLens");
 	localStorage.removeItem("vaultScales");
+	localStorage.removeItem(REALM_COMPLETE_KEY);
+	localStorage.setItem(REALM_STATUS_KEY, "contested");
+	localStorage.setItem(REALM_ROOM_KEY, "1");
 	
     questionHistory = {
         easy: [], medium: [], hard: [], elite: [], calculation: [],
@@ -4942,7 +5013,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
                 currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
 
             msgElement.innerHTML =
-                `<span class='fade-out-text'>Control returns. Now prove your command under pressure.</span>`;
+                `<span class='fade-out-text'>${getRecoveryLine("bridge")}</span>`;
 
             displayQuestion();
             return;
@@ -4967,7 +5038,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
                 currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
 
             msgElement.innerHTML =
-                `<span class='fade-out-text'>The concept is contained. One final proof.</span>`;
+                `<span class='fade-out-text'>${getRecoveryLine("retest")}</span>`;
 
             displayQuestion();
             return;
@@ -4980,7 +5051,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
     adaptiveMode = "support";
 
     msgElement.innerHTML =
-        `<span class='fade-out-text'>Recovery confirmed. Return to the Gate.</span>`;
+        `<span class='fade-out-text'>${getRecoveryLine("complete")}</span>`;
 
     room = returnRoom;
     localStorage.setItem("gauntletRoom", room);
@@ -5002,8 +5073,21 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         if(isBossRoom){
         bossHealth--;
         
-        msgElement.innerHTML = `<span style='color:#f87171;font-weight:bold;'>⚔ HIT! Boss Health: ${bossHealth}/3</span>`;
-        triggerBossShake();
+		const bossLine = getMarketGateBossLine({
+ 		 isCorrect: true,
+ 		 tag: currentQuestion.tag || "",
+		  type: currentQuestion.type || "",
+ 		 objective: currentQuestion.objective || inferObjective(currentQuestion),
+ 		 streak,
+ 		 bossHealth,
+ 		 responseTime
+		});
+
+		msgElement.innerHTML =
+		  `<span style='color:#f87171;font-weight:bold;'>⚔ HIT! Boss Health: ${bossHealth}/3</span><br>
+   			<span class='fade-out-text'>${bossLine}</span>`;
+
+		triggerBossShake();
         
         if (bossHealth > 0) {
            setTimeout(loadQuestion, TIMING.boss);
@@ -5088,6 +5172,20 @@ if(room === 30){
             (conceptMemory[currentQuestion.tag] || 0) + rushPenalty;
     }
 
+	if(isBossRoom){
+	  const bossLine = getMarketGateBossLine({
+    	isCorrect: false,
+    	tag: currentQuestion.tag || "",
+    	type: currentQuestion.type || "",
+    	objective: currentQuestion.objective || inferObjective(currentQuestion),
+    	streak,
+    	bossHealth,
+    	responseTime
+  	 });
+
+     msgElement.innerHTML = `<span class='fade-out-text'>${bossLine}</span>`;
+   }
+
     // --- IF STUDENT MISSES DURING ACTIVE REMEDIATION ---
 if(remediationState.active){
     const remediationPrompt = getRemediationQuestion(remediationState);
@@ -5103,7 +5201,7 @@ if(remediationState.active){
             currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
 
         msgElement.innerHTML =
-            `<span class='fade-out-text'>Your control is still unstable. Repair the weakness before advancing.</span>`;
+            `<span class='fade-out-text'>${getRecoveryLine("miss")}</span>`;
 
         displayQuestion();
         return;
@@ -5364,6 +5462,7 @@ function triggerBossShake() {
 // This is BOTH UI + progression logic.
 // Edit carefully.
 // =============================================
+	 
 function showKnowledgeRoom(bossRoom) {
     playExplorationMusic();  
   
@@ -5389,16 +5488,16 @@ function showKnowledgeRoom(bossRoom) {
 // - actual boss encounters
 // =============================================    
 if (bossRoom === 10) {
-    title = "THE FRONTIER KEEPER YIELDS: THE FRONTIER COMPASS IS YOURS";
-    summary = "The old boundary bends, but it does not break. You have read the production frontier, measured opportunity cost, and recognized the tradeoffs hidden behind every choice.";
+  title = "THE FRONTIER KEEPER YIELDS";
+  summary = "The Frontier Compass locks into place. Scarcity, tradeoffs, opportunity cost, and the production frontier begin to stabilize. The Gate now recognizes that every choice carries a cost.";
 } 
 else if (bossRoom === 20) {
-    title = "THE SIGNAL BROKER FALLS: THE SIGNAL LENS CLEARS";
-    summary = "The market noise settles. You have separated demand from quantity demanded, supply from quantity supplied, and traced how shifts move price and quantity through the market.";
+  title = "THE SIGNAL BROKER FALLS";
+  summary = "The Signal Lens clears. Demand, supply, equilibrium, and market shifts become visible again. Prices can speak, and the Gate can read the movement of buyers and sellers.";
 } 
 else if (bossRoom === 30) {
-    title = "THE PRICE MAGISTRATE BREAKS: THE MAGISTRATE'S SCALES ARE YOURS";
-    summary = "The decree has been judged. You have exposed binding ceilings, binding floors, shortages, surpluses, and tax burdens. When policy forces price away from equilibrium, you now see the imbalance it creates.";
+  title = "THE PRICE MAGISTRATE DEFEATED";
+  summary = "The Magistrate's Scales settle. Price ceilings, floors, taxes, shortages, surpluses, and tax burdens have been weighed. The Market Gate is restored.";
 }
 
 // Update the UI
@@ -5409,7 +5508,7 @@ qContainer.innerHTML = `
 
 // logic to ensure Room 30 triggers the end game, while 10 and 20 trigger the next level
 let nextAction = bossRoom === 30 ? "handleVictory()" : "room++; loadQuestion();";
-let buttonLabel = bossRoom === 30 ? "COMPLETE THE MARKET GATE →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
+let buttonLabel = bossRoom === 30 ? "RESTORE THE MARKET GATE →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
 
 aContainer.innerHTML = `
 <button id="continueBtn" class="continue-btn">
@@ -5523,7 +5622,12 @@ function generateCode(name, acc, streak, total){
 // This is a PRESENTATION layer, not a logic layer.
 // =============================================     
 function handleVictory() {
-    clearSavedGame();
+    localStorage.setItem(REALM_STARTED_KEY, "true");
+	localStorage.setItem(REALM_COMPLETE_KEY, "true");
+	localStorage.setItem(REALM_STATUS_KEY, "restored");
+	localStorage.setItem(REALM_ROOM_KEY, "30");
+	
+	clearSavedGame();
 	bgMusic.pause();
     bossMusic.pause();
     if (typeof sfxVictory !== 'undefined') {
