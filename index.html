@@ -562,6 +562,44 @@ button:active {
         inset 0 0 10px rgba(0,0,0,0.86);
 }
 
+.return-menu-btn{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    padding: 6px 12px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    color: #e0f2fe;
+    background: linear-gradient(180deg, #12304f, #04101f);
+
+    border: 1px solid rgba(56,189,248,0.32);
+    border-radius: 6px;
+    cursor: pointer;
+
+    box-shadow:
+        0 0 10px rgba(56,189,248,0.22),
+        inset 0 0 7px rgba(0,0,0,0.80);
+
+    transition: all 0.15s ease;
+}
+
+.return-menu-btn:hover {
+    color: #f7d982;
+    background: linear-gradient(180deg, #1d4d73, #0b2238);
+    border-color: rgba(247,217,130,0.62);
+
+    box-shadow:
+        0 0 16px rgba(56,189,248,0.34),
+        inset 0 0 8px rgba(0,0,0,0.76);
+}
+
+.return-menu-btn:active {
+    transform: scale(0.95);
+}
+
 .continue-btn {
     background: linear-gradient(180deg, #1d4d73, #04101f);
     color: #f7d982;
@@ -1390,8 +1428,10 @@ button:active {
 
 @media (max-width: 768px){
   .fullscreenBtn{
+  .return-menu-btn{
     display: none !important;
   }
+ }
 
   .dungeon-container{
     gap: 8px;
@@ -1959,6 +1999,7 @@ Respect structure strictly.
 
 <div class="dungeon-container">
     <button class="fullscreenBtn" onclick="goFullscreen()">FULLSCREEN</button>
+	<button id="returnMenuBtn" class="return-menu-btn" onclick="confirmReturnToModeMenu()">BATTLE MENU</button>
     <button id="soundToggle" class="sound-toggle" onclick="toggleGameSound()" aria-label="Toggle sound">Sound On</button>
 
 <!-- =========================================
@@ -3556,10 +3597,53 @@ function startSelectedMode(mode){
     const modeScreen = document.getElementById("modeSelectScreen");
     if(modeScreen) modeScreen.style.display = "none";
 
-    clearSavedGame();
+    if(gameMode === "standard"){
+        startGame(false);
+        return;
+    }
+
+    resetRunStateForNewMode();
     startGame(false);
 }
 
+function confirmReturnToModeMenu(){
+    const confirmed = confirm(
+        "Return to the battle menu? Standard Campaign progress will be saved. Timed Trial and Exam Drill attempts will end."
+    );
+
+    if(!confirmed) return;
+
+    if(gameMode === "standard"){
+        saveGameState();
+    }
+
+    if(gameMode === "timed"){
+        endTimedAttemptEarly();
+        return;
+    }
+
+    returnToModeSelectFromRun();
+}
+
+function endTimedAttemptEarly(){
+    stopTimedModeClock();
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    localStorage.setItem("marketGateTimedLastRoom", String(room));
+    localStorage.setItem("marketGateTimedLastAccuracy", String(accuracy));
+    localStorage.setItem("marketGateTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("marketGateTimedLastStreak", String(maxStreak));
+
+    const bestRoom = Number(localStorage.getItem("marketGateTimedBestRoom") || 0);
+    if(room > bestRoom){
+        localStorage.setItem("marketGateTimedBestRoom", String(room));
+    }
+
+    returnToModeSelectFromRun();
+}
 
 function showContinueButtonIfSaved(){
     const btn = document.getElementById("continueRunBtn");
