@@ -9,7 +9,25 @@ This file is divided into TWO zones:
    - Question banks
    - Boss names/images
    - Text (wizard, areas, artifacts)
-   - Visual themes
+   - Visual themesfunction endTimedAttemptEarly(){
+    stopTimedModeClock();
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    localStorage.setItem("marketGateTimedLastRoom", String(room));
+    localStorage.setItem("marketGateTimedLastAccuracy", String(accuracy));
+    localStorage.setItem("marketGateTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("marketGateTimedLastStreak", String(maxStreak));
+
+    const bestRoom = Number(localStorage.getItem("marketGateTimedBestRoom") || 0);
+    if(room > bestRoom){
+        localStorage.setItem("marketGateTimedBestRoom", String(room));
+    }
+
+    returnToModeSelectFromRun();
+}
 
 2. DO NOT TOUCH (Core Engine)
    - Adaptive logic
@@ -1427,11 +1445,10 @@ button:active {
 ========================================= */
 
 @media (max-width: 768px){
-  .fullscreenBtn{
+  .fullscreenBtn,
   .return-menu-btn{
     display: none !important;
   }
- }
 
   .dungeon-container{
     gap: 8px;
@@ -1451,15 +1468,6 @@ button:active {
     font-size: clamp(14px, 3.6vw, 18px);
     margin-bottom: 2px;
     text-align: center;
-  }
-
-  .fullscreenBtn{
-    position: static;
-    display: block;
-    align-self: flex-start;
-    margin: 0 0 4px 0;
-    padding: 6px 10px;
-    font-size: 11px;
   }
 
   #mazeTrackContainer{
@@ -3709,7 +3717,7 @@ function startGame(shouldResume = false) {
     }
 
    studentEmail = inputEmail;
-username = generatePseudonymFromEmail(studentEmail);
+   username = generatePseudonymFromEmail(studentEmail);
 
 const hasSavedRun = shouldResume ? loadSavedGame() : false;
 
@@ -3789,9 +3797,12 @@ if(!hasSavedRun){
     document.getElementById("startScreen").style.display = "none";
     const modeScreen = document.getElementById("modeSelectScreen");
     if(modeScreen) modeScreen.style.display = "none";
+	document.querySelector(".top-panel").style.display = "flex";
+    document.getElementById("gameShell").style.display = "flex";
     document.getElementById("gameBox").style.display = "block";
     document.getElementById("artifactVault").style.display = "block";
     document.querySelectorAll(".torch").forEach(t => t.style.display = "block");
+
 
    // =============================================
    // VAULT RESTORE SYSTEM — SAFE WITH MATCHING IDS
@@ -4004,6 +4015,8 @@ function returnToModeSelectFromRun(){
     document.getElementById("gameBox").style.display = "none";
     document.getElementById("artifactVault").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "flex";
+	document.querySelector(".top-panel").style.display = "none";
+	document.getElementById("gameShell").style.display = "none";
 }
 
 function getDifficultyForMode(){
@@ -4264,7 +4277,7 @@ mediumBoss: [
 ],
    
 finalBoss: [
-{ id: 4001, q: "A city sets a price ceiling below equilibrium to make apartments affordable. The legal rent falls, but renters wait longer, landlords reduce maintenance, and some units are rented off-book. What is the strongest economic conclusion?", options: ["The posted price falls, but shortage shifts part of the cost into waiting, quality loss, and rationing", "The posted price falls, so the policy removes the main cost renters face in the market", "The posted price falls, but the shortage means sellers now compete harder for renters", "The posted price falls, so the market clears through a lower equilibrium rent"], a: 0, tag: "price_ceiling", type: "synthesis", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_unintended_consequences", secondarySkills: ["shortage", "nonmoney_rationing", "misallocation"], repairSkill: "binding_price_ceiling", commonError: "focuses_only_on_lower_legal_price", feedback: "A binding ceiling can lower the posted price while creating shortage, search costs, lower quality, rationing, and misallocation." },
+{ id: 4000, q: "A city sets a price ceiling below equilibrium to make apartments affordable. The legal rent falls, but renters wait longer, landlords reduce maintenance, and some units are rented off-book. What is the strongest economic conclusion?", options: ["The posted price falls, but shortage shifts part of the cost into waiting, quality loss, and rationing", "The posted price falls, so the policy removes the main cost renters face in the market", "The posted price falls, but the shortage means sellers now compete harder for renters", "The posted price falls, so the market clears through a lower equilibrium rent"], a: 0, tag: "price_ceiling", type: "synthesis", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_unintended_consequences", secondarySkills: ["shortage", "nonmoney_rationing", "misallocation"], repairSkill: "binding_price_ceiling", commonError: "focuses_only_on_lower_legal_price", feedback: "A binding ceiling can lower the posted price while creating shortage, search costs, lower quality, rationing, and misallocation." },
 { id: 4001, q: "A city sets a price ceiling below equilibrium to make apartments affordable. The legal rent falls, but renters wait longer, landlords reduce maintenance, and some units are rented off-book. What is the strongest economic conclusion?", options: ["The posted money price falls, but shortage creates nonmoney costs and misallocation", "The policy eliminates scarcity because rent is lower", "The policy creates a surplus because renters want fewer apartments", "The policy is nonbinding because people still pay with time"], a: 0, tag: "price_ceiling", type: "synthesis", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_unintended_consequences", secondarySkills: ["shortage", "nonmoney_rationing", "misallocation"], repairSkill: "binding_price_ceiling", commonError: "focuses_only_on_lower_legal_price", feedback: "A binding ceiling can lower the posted price while creating shortage, search costs, lower quality, rationing, and misallocation." },
 { id: 4002, q: "A price ceiling is set at $40. The equilibrium price is $35. At $40, quantity supplied equals quantity demanded. What happens in the market?", options: ["The ceiling is nonbinding and the market remains at equilibrium", "The ceiling is binding and creates a shortage", "The ceiling is binding and creates a surplus", "The ceiling forces quantity supplied below quantity demanded"], a: 0, tag: "price_ceiling", type: "trap", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "nonbinding_price_ceiling", secondarySkills: ["binding_policy", "equilibrium"], repairSkill: "binding_price_ceiling", commonError: "thinks_all_price_ceilings_bind", feedback: "A ceiling only binds if it is below equilibrium. A ceiling above equilibrium does not change the market outcome." },
 { id: 4003, q: "The Magistrate sets a minimum wage at $16 when the equilibrium wage is $12. At $16, firms demand 70,000 workers and 110,000 workers want jobs. What is the best diagnosis?", options: ["The floor is binding and creates a labor surplus of 40,000 workers", "The floor is binding and creates a labor shortage of 40,000 workers", "The floor is nonbinding because workers prefer higher wages", "The floor increases labor demand by 40,000 workers"], a: 0, tag: "price_floor", type: "multi-step", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "binding_floor_surplus_calculation", secondarySkills: ["minimum_wage", "labor_surplus", "unemployment"], repairSkill: "binding_price_floor", commonError: "confuses_labor_surplus_with_shortage", feedback: "A price floor above equilibrium is binding. Labor surplus equals quantity supplied minus quantity demanded, so 110,000 - 70,000 = 40,000 workers." },
@@ -5752,7 +5765,7 @@ if(modeAllowsRealmProgress()){
     // AND it wasn't a Boss Room (or a Detour).
    msgElement.innerHTML = "";
    room++;
-   timedHighestRoom = Math.max(timedHighestRoom, room);
+   timedHighestRoom = Math.max(timedHighestRoom, Math.min(room, 30));
    saveGameState();
    localStorage.setItem("gauntletRoom", room);
 
