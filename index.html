@@ -3761,18 +3761,22 @@ function showGameModal({
     modal.style.display = "flex";
 
     confirmBtn.onclick = function(){
-        closeGameModal();
-        if(typeof activeModalConfirmAction === "function"){
-            activeModalConfirmAction();
-        }
-    };
+    const action = activeModalConfirmAction;
+    closeGameModal();
 
-    cancelBtn.onclick = function(){
-        closeGameModal();
-        if(typeof activeModalCancelAction === "function"){
-            activeModalCancelAction();
-        }
-    };
+    if(typeof action === "function"){
+        action();
+    }
+};
+
+cancelBtn.onclick = function(){
+    const action = activeModalCancelAction;
+    closeGameModal();
+
+    if(typeof action === "function"){
+        action();
+    }
+};
 }
 
 function closeGameModal(){
