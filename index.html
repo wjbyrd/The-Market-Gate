@@ -1106,6 +1106,67 @@ button:active {
       0 2px 6px rgba(0,0,0,0.90);
 }
 
+.game-modal{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(2,6,23,0.72);
+  backdrop-filter:blur(6px);
+}
+
+.game-modal-card{
+  width:min(520px, 100%);
+  padding:28px;
+  border-radius:18px;
+
+  background:
+    radial-gradient(circle at top,
+      rgba(56,189,248,0.16),
+      rgba(11,34,56,0.88) 48%,
+      rgba(2,6,23,0.98));
+
+  border:1px solid rgba(247,217,130,0.42);
+
+  box-shadow:
+    0 0 34px rgba(0,0,0,0.88),
+    0 0 38px rgba(56,189,248,0.24),
+    0 0 46px rgba(247,217,130,0.14),
+    inset 0 0 30px rgba(0,0,0,0.72);
+
+  text-align:center;
+}
+
+.game-modal-card h2{
+  margin:0 0 12px;
+  color:#f7d982;
+  font-size:30px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.game-modal-card p{
+  margin:0 0 24px;
+  color:#e0f2fe;
+  font-size:18px;
+  line-height:1.45;
+}
+
+.game-modal-actions{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.secondary-modal-btn{
+  color:#e0f2fe;
+  border-color:rgba(56,189,248,0.42);
+}
+	
 /* =========================================
    9. ANIMATION SYSTEM — THE MARKET GATE
 ========================================= */
@@ -2116,6 +2177,18 @@ DO NOT REMOVE:
         </div>
     </div>
 </div>
+</div>
+
+<div id="gameModal" class="game-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="gameModalTitle">
+  <div class="game-modal-card">
+    <h2 id="gameModalTitle">Signal Warning</h2>
+    <p id="gameModalText"></p>
+
+    <div class="game-modal-actions">
+      <button id="gameModalConfirm" class="continue-btn">Continue</button>
+      <button id="gameModalCancel" class="continue-btn secondary-modal-btn" style="display:none;">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- =========================================
@@ -3629,22 +3702,85 @@ function startSelectedMode(mode){
 }
 
 function confirmReturnToModeMenu(){
-    const confirmed = confirm(
-        "Return to the battle menu? Standard Campaign progress will be saved. Timed Trial and Exam Drill attempts will end."
-    );
+    showGameModal({
+        title: "Return to Battle Menu?",
+        text: "Standard Campaign progress will be saved. Timed Trial and Exam Drill attempts will end.",
+        confirmText: "Return",
+        cancelText: "Stay",
+        onConfirm: function(){
+            if(gameMode === "standard"){
+                saveGameState();
+            }
 
-    if(!confirmed) return;
+            if(gameMode === "timed"){
+                endTimedAttemptEarly();
+                return;
+            }
 
-    if(gameMode === "standard"){
-        saveGameState();
-    }
+            returnToModeSelectFromRun();
+        }
+    });
+}
 
-    if(gameMode === "timed"){
-        endTimedAttemptEarly();
+let activeModalConfirmAction = null;
+let activeModalCancelAction = null;
+
+function showGameModal({
+    title = "Signal Warning",
+    text = "",
+    confirmText = "Continue",
+    cancelText = "",
+    onConfirm = null,
+    onCancel = null
+} = {}){
+    const modal = document.getElementById("gameModal");
+    const titleEl = document.getElementById("gameModalTitle");
+    const textEl = document.getElementById("gameModalText");
+    const confirmBtn = document.getElementById("gameModalConfirm");
+    const cancelBtn = document.getElementById("gameModalCancel");
+
+    if(!modal || !titleEl || !textEl || !confirmBtn || !cancelBtn){
+        console.warn("Game modal elements are missing.");
         return;
     }
 
-    returnToModeSelectFromRun();
+    activeModalConfirmAction = onConfirm;
+    activeModalCancelAction = onCancel;
+
+    titleEl.innerText = title;
+    textEl.innerText = text;
+    confirmBtn.innerText = confirmText;
+
+    if(cancelText){
+        cancelBtn.innerText = cancelText;
+        cancelBtn.style.display = "inline-block";
+    } else {
+        cancelBtn.style.display = "none";
+    }
+
+    modal.style.display = "flex";
+
+    confirmBtn.onclick = function(){
+        closeGameModal();
+        if(typeof activeModalConfirmAction === "function"){
+            activeModalConfirmAction();
+        }
+    };
+
+    cancelBtn.onclick = function(){
+        closeGameModal();
+        if(typeof activeModalCancelAction === "function"){
+            activeModalCancelAction();
+        }
+    };
+}
+
+function closeGameModal(){
+    const modal = document.getElementById("gameModal");
+    if(modal) modal.style.display = "none";
+
+    activeModalConfirmAction = null;
+    activeModalCancelAction = null;
 }
 
 function endTimedAttemptEarly(){
