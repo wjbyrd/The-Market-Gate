@@ -5649,8 +5649,8 @@ function answer(choice) {
     const isBossRoom = isBossRoomForMode(room);
     const msgElement = document.getElementById("message");
     const wizard = document.getElementById("wizardImage");
-const isCorrect = (choice === currentQuestion.a);
-const responseTime = Date.now() - questionStartTime;
+	const isCorrect = (choice === currentQuestion.a);
+	const responseTime = Date.now() - questionStartTime;
 
 // =============================================
 // RAPID GUESSING LOCKOUT
@@ -6038,14 +6038,20 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
 	let newRoom = room - fallback;
 
 // Never fall back behind the most recently cleared boss gate
-	room = Math.max(bossCheckpoint, newRoom);
-    if(gameMode === "timed") timedSetbacks++;
+room = Math.max(bossCheckpoint, newRoom);
 
-    localStorage.setItem("gauntletRoom", room);
+if(gameMode === "timed") timedSetbacks++;
 
-    alert(`Incorrect! You trip in the darkness and tumble back to Room ${room}.`);
-
-    loadQuestion();
+localStorage.setItem("gauntletRoom", room);
+	
+showGameModal({
+    title: "Wrong Turn",
+    text: `Incorrect! You trip in the darkness and tumble back to Room ${room}.`,
+    confirmText: "Continue",
+    onConfirm: function(){
+        loadQuestion();
+    }
+});
 }
 
 // =============================================
