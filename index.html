@@ -5384,15 +5384,26 @@ function loadQuestion() {
         // 1. If it's a new fight (Health 3), decide the "Theme" of the boss
         if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
             const bank = [...questionBanks[diff]];
-            let chosenTag = getWeakestTag();
+		  	let chosenTag = getWeakestTag();
 
-            bossPool = chosenTag 
-                ? bank.filter(q => q.tag === chosenTag) 
-                : [];
+			const bossTags = [...new Set(bank.map(q => q.tag))];
 
-            if (bossPool.length < 3) {
-                bossPool = bank.slice(0, 3);
-            }
+			const eligibleTags = bossTags.filter(tag =>
+    			bank.filter(q => q.tag === tag).length >= 3
+			);
+
+			let candidatePool = chosenTag
+   			 ? bank.filter(q => q.tag === chosenTag)
+  			  : [];
+
+			// If the selected weak tag does not support a full boss set,
+			// choose a valid boss theme instead.
+			if (candidatePool.length < 3) {
+    		const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
+    			candidatePool = bank.filter(q => q.tag === randomTag);
+			}
+
+			bossPool = candidatePool.slice(0, 3);
         }
 
         // 2. Select the specific question based on boss health
