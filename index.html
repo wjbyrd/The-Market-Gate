@@ -2074,6 +2074,12 @@ Respect structure strictly.
   <span class="mode-card-text">No bosses. No artifacts. No realm progress. Just adaptive practice.</span>
 </button>
 
+<button class="mode-card" onclick="startSelectedMode('legendary')" aria-label="Legendary Mode. Full 30-room campaign using only mastery-level multi-step questions with close answer choices.">
+  <img src="mode_legendary.png" alt="" aria-hidden="true">
+  <span class="mode-card-title">Legendary Mode</span>
+  <span class="mode-card-text">Full campaign. Legendary-only questions. Bosses still hit. No mercy.</span>
+</button>
+
     </div>
 
     <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
@@ -2361,19 +2367,23 @@ let usedQuestions = {
     medium: [],
     hard: [],
     elite: [],
+    legendary: [],
     easyBoss: [],
     mediumBoss: [],
     finalBoss: [],
+    legendaryBoss: [],
 };
 let questionHistory = {
     easy: [],
     medium: [],
     hard: [],
     elite: [],
+    legendary: [],
     calculation: [],
     easyBoss: [],
     mediumBoss: [],
     finalBoss: [],
+    legendaryBoss: [],
 };
 
 const SAVE_KEY = "marketGateSave_v1";
@@ -2391,7 +2401,7 @@ let timedHighestRoom = 1;
 let timedSetbacks = 0;
 
 function modeAllowsSave(){
-    return gameMode === "standard";
+    return gameMode === "standard" || gameMode === "legendary";
 }
 
 function modeAllowsRealmProgress(){
@@ -2406,6 +2416,7 @@ function isBossRoomForMode(r){
     if(gameMode === "exam") return false;
     if(gameMode === "timed") return false;
     if(gameMode === "bossRush") return true;
+    if(gameMode === "legendary") return r === 10 || r === 20 || r === 30;
     return r === 10 || r === 20 || r === 30;
 }
 
@@ -2413,6 +2424,7 @@ function getModeDisplayName(){
     if(gameMode === "timed") return "Timed Trial";
     if(gameMode === "exam") return "Exam Drill";
     if(gameMode === "bossRush") return "Boss Rush";
+    if(gameMode === "legendary") return "Legendary Mode";
     return "Standard Campaign";
 }
 
@@ -3934,13 +3946,13 @@ if(!hasSavedRun){
 	}
 	
     questionHistory = {
-        easy: [], medium: [], hard: [], elite: [], calculation: [],
-        easyBoss: [], mediumBoss: [], finalBoss: []
+        easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [],
+        easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
     };
 
     usedQuestions = {
-        easy: [], medium: [], hard: [], elite: [],
-        easyBoss: [], mediumBoss: [], finalBoss: []
+        easy: [], medium: [], hard: [], elite: [], legendary: [],
+        easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
     };
 }
     
@@ -4007,13 +4019,13 @@ function resetRunStateForNewMode(){
     timedSetbacks = 0;
 
     questionHistory = {
-        easy: [], medium: [], hard: [], elite: [], calculation: [],
-        easyBoss: [], mediumBoss: [], finalBoss: []
+        easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [],
+        easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
     };
 
     usedQuestions = {
-        easy: [], medium: [], hard: [], elite: [],
-        easyBoss: [], mediumBoss: [], finalBoss: []
+        easy: [], medium: [], hard: [], elite: [], legendary: [],
+        easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
     };
 }
 
@@ -4026,9 +4038,11 @@ function initializeRunForMode(mode){
             ? "⏱ Timed Trial Active"
             : gameMode === "exam"
                 ? "✎ Exam Drill Active"
-                : gameMode === "bossRush"
-                    ? "⚔ Boss Rush Active"
-                    : "💾 Market Signal Preserved";
+                : gameMode === "legendary"
+                    ? "🔥 Legendary Mode Active"
+                    : gameMode === "bossRush"
+                        ? "⚔ Boss Rush Active"
+                        : "💾 Market Signal Preserved";
     }
 
     if(gameMode === "timed"){
@@ -4178,6 +4192,12 @@ function getDifficultyForMode(){
         return (room <= 10) ? "easy"
             : (room <= 20) ? "medium"
             : "hard";
+    }
+
+    if(gameMode === "legendary"){
+        return (room === 10 || room === 20 || room === 30)
+            ? "legendaryBoss"
+            : "legendary";
     }
 
     if(gameMode === "bossRush"){
@@ -4366,6 +4386,2558 @@ function wizardSpeak(text){
 // This is where instructors customize content.
   
 const questionBanks = {
+legendary: [
+  {
+    "id": 9000,
+    "q": "Refer to the PPF graph. A move from B to C changes production from about 8 X and 45 Y to 15 X and 35 Y. Which answer best states the tradeoff?",
+    "options": [
+      "Gain 7 units of X while giving up 10 units of Y",
+      "Gain 10 units of X while giving up 7 units of Y",
+      "Gain 7 units of Y while giving up 10 units of X",
+      "Gain 10 units of Y while giving up 7 units of X"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_calculation",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "ppf_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "From B to C, X rises from 8 to 15 and Y falls from 45 to 35, so the tradeoff is +7 X for -10 Y.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9001,
+    "q": "Refer to the PPF graph. Which statement best compares points F and G?",
+    "options": [
+      "F is attainable but inefficient, while G is unattainable with current resources",
+      "F is unattainable with current resources, while G is attainable but inefficient",
+      "F and G are both efficient because neither is on an axis",
+      "F and G are both inefficient because neither lies on the frontier"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_interpretation",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_efficiency_status",
+    "secondarySkills": [],
+    "repairSkill": "ppf_efficiency_status",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Inside the PPF is attainable but inefficient; outside the PPF is unattainable with current resources.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9002,
+    "q": "Refer to the PPF graph. A move from C to D increases Good X from 15 to 21 while Good Y falls from 35 to 20. What is the opportunity cost per additional X?",
+    "options": [
+      "2.5 units of Y per unit of X",
+      "0.4 units of Y per unit of X",
+      "6 units of Y per unit of X",
+      "15 units of Y per unit of X"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_calculation",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "ppf_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The economy gives up 15 Y to gain 6 X, so 15/6 = 2.5 Y per X.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9003,
+    "q": "Refer to the PPF graph. If the economy is at F, which move most directly shows improved use of currently idle resources rather than economic growth?",
+    "options": [
+      "Move from F to B on the existing frontier",
+      "Move from B to G beyond the existing frontier",
+      "Move from A to E along the existing frontier",
+      "Move from C to D along the existing frontier"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_interpretation",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_efficiency_status",
+    "secondarySkills": [],
+    "repairSkill": "ppf_efficiency_status",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Moving from inside the frontier to the frontier uses idle resources more efficiently. Growth would shift the frontier outward.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9004,
+    "q": "Refer to the PPF graph. Why does the opportunity cost of Good X rise as production moves from A toward E?",
+    "options": [
+      "Resources are increasingly less suited to producing additional X",
+      "Resources become perfectly adaptable between X and Y",
+      "The economy has escaped scarcity by moving along the curve",
+      "The money price of X must fall as X production rises"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_interpretation",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A bowed-out PPF reflects increasing opportunity cost because resources are not equally suited to both goods.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9005,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9006,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9007,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9008,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9009,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9010,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9011,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9012,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9013,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9014,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9015,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. Starting at D1 and S1, demand increases to D2 while supply stays at S1. What happens?",
+    "options": [
+      "Equilibrium moves from Q1/P2 to Q2/P3",
+      "Equilibrium moves from Q2/P1 to Q3/P2",
+      "Equilibrium moves from Q1/P2 to Q2/P1",
+      "Equilibrium moves from Q3/P2 to Q2/P3"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "graph_interpretation",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "market_shift_analysis",
+    "secondarySkills": [],
+    "repairSkill": "market_shift_analysis",
+    "commonError": "legendary_near_match_error",
+    "feedback": "With supply at S1, a demand increase from D1 to D2 raises both equilibrium price and quantity.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9016,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. Starting at D2 and S1, supply increases to S2 while demand stays at D2. What happens?",
+    "options": [
+      "Equilibrium moves from Q2/P3 to Q3/P2",
+      "Equilibrium moves from Q1/P2 to Q2/P3",
+      "Equilibrium moves from Q2/P1 to Q3/P2",
+      "Equilibrium moves from Q3/P2 to Q2/P1"
+    ],
+    "a": 0,
+    "tag": "supply",
+    "type": "graph_interpretation",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "supply_shift_analysis",
+    "secondarySkills": [],
+    "repairSkill": "supply_shift_analysis",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply increase shifts supply right from S1 to S2, lowering price and raising quantity.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9017,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. Which comparison best captures the difference between moving from D1 to D2 and moving along D1?",
+    "options": [
+      "D1 to D2 is a demand shift; movement along D1 is a quantity demanded change",
+      "D1 to D2 is a quantity demanded change; movement along D1 is a demand shift",
+      "D1 to D2 is a supply shift; movement along D1 is a supply decrease",
+      "D1 to D2 is a price ceiling; movement along D1 is a price floor"
+    ],
+    "a": 0,
+    "tag": "demand",
+    "type": "graph_trap",
+    "objective": "LO4.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "movement_vs_shift",
+    "secondarySkills": [],
+    "repairSkill": "movement_vs_shift",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A non-price determinant shifts demand; a price change causes movement along a demand curve.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9018,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. Starting at D1 and S2, supply decreases to S1 while demand stays at D1. What happens?",
+    "options": [
+      "Equilibrium moves from Q2/P1 to Q1/P2",
+      "Equilibrium moves from Q1/P2 to Q2/P1",
+      "Equilibrium moves from Q3/P2 to Q2/P3",
+      "Equilibrium moves from Q2/P3 to Q3/P2"
+    ],
+    "a": 0,
+    "tag": "supply",
+    "type": "graph_interpretation",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "supply_shift_analysis",
+    "secondarySkills": [],
+    "repairSkill": "supply_shift_analysis",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A decrease in supply shifts supply left, raising price and lowering quantity.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9019,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. If both demand and supply increase from D1/S1 to D2/S2, what outcome is shown in this particular graph?",
+    "options": [
+      "Quantity rises from Q1 to Q3 while price stays at P2",
+      "Quantity stays at Q1 while price rises from P1 to P3",
+      "Quantity falls from Q3 to Q1 while price stays at P2",
+      "Quantity rises from Q1 to Q2 while price falls to P1"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "graph_integration",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "In this drawn case, both shifts raise quantity, while price remains at P2.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9020,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9021,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9022,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9023,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9024,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9025,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9026,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9027,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9028,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9029,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9030,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9031,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9032,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9033,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9034,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9035,
+    "q": "Refer to the ceiling/floor graph. The market equilibrium is $30 and 200 units. If a legal maximum price is set at $20, what happens?",
+    "options": [
+      "A binding price ceiling creates a 150-unit shortage",
+      "A binding price floor creates a 100-unit surplus",
+      "A nonbinding price ceiling leaves quantity at 200",
+      "A nonbinding price floor leaves price at $30"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "graph_calculation",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "binding_ceiling_shortage",
+    "secondarySkills": [],
+    "repairSkill": "binding_ceiling_shortage",
+    "commonError": "legendary_near_match_error",
+    "feedback": "At $20, quantity demanded is 250 and quantity supplied is 100, so the shortage is 150.",
+    "image": "ceilingfloor.png"
+  },
+  {
+    "id": 9036,
+    "q": "Refer to the ceiling/floor graph. The market equilibrium is $30 and 200 units. If a legal minimum price is set at $40, what happens?",
+    "options": [
+      "A binding price floor creates a 100-unit surplus",
+      "A binding price ceiling creates a 150-unit shortage",
+      "A nonbinding price floor leaves quantity at 200",
+      "A nonbinding price ceiling leaves price at $30"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "graph_calculation",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "binding_floor_surplus",
+    "secondarySkills": [],
+    "repairSkill": "binding_floor_surplus",
+    "commonError": "legendary_near_match_error",
+    "feedback": "At $40, quantity supplied is 250 and quantity demanded is 150, so the surplus is 100? Wait, from the graph Qs=250 and Qd=150, so surplus is 100 units.",
+    "image": "ceilingfloor.png"
+  },
+  {
+    "id": 9037,
+    "q": "Refer to the ceiling/floor graph. A price ceiling of $50 is imposed. Which answer is best?",
+    "options": [
+      "The ceiling is nonbinding because it is above the $30 equilibrium price",
+      "The ceiling is binding because it is above the $30 equilibrium price",
+      "The ceiling creates a surplus because quantity supplied exceeds quantity demanded",
+      "The ceiling creates a shortage because quantity demanded exceeds quantity supplied"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "graph_trap",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "nonbinding_price_ceiling",
+    "secondarySkills": [],
+    "repairSkill": "nonbinding_price_ceiling",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A ceiling above equilibrium does not restrict the market price, so it is nonbinding.",
+    "image": "ceilingfloor.png"
+  },
+  {
+    "id": 9038,
+    "q": "Refer to the ceiling/floor graph. A price floor of $10 is imposed. Which answer is best?",
+    "options": [
+      "The floor is nonbinding because it is below the $30 equilibrium price",
+      "The floor is binding because it is below the $30 equilibrium price",
+      "The floor creates a shortage because quantity demanded exceeds quantity supplied",
+      "The floor creates a surplus because quantity supplied exceeds quantity demanded"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "graph_trap",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "nonbinding_price_floor",
+    "secondarySkills": [],
+    "repairSkill": "nonbinding_price_floor",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A floor below equilibrium does not restrict the market price, so it is nonbinding.",
+    "image": "ceilingfloor.png"
+  },
+  {
+    "id": 9039,
+    "q": "Refer to the ceiling/floor graph. At a legal price of $20, what hidden effect should students expect beyond the posted price?",
+    "options": [
+      "Nonmoney rationing rises because quantity demanded exceeds quantity supplied",
+      "Nonmoney rationing falls because quantity supplied exceeds quantity demanded",
+      "Producer competition rises because sellers have excess unsold units",
+      "The market clears because the legal price is below equilibrium"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "graph_integration",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding ceiling creates shortage, so rationing shifts into waiting, search costs, quality loss, and favoritism.",
+    "image": "ceilingfloor.png"
+  },
+  {
+    "id": 9040,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9041,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9042,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9043,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9044,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9045,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9046,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9047,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9048,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9049,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9050,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9051,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9052,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9053,
+    "q": "A minimum wage is set above the equilibrium wage. Some workers receive higher pay, firms hire fewer workers, and more workers seek jobs. What is the cleanest interpretation?",
+    "options": [
+      "The floor helps some employed workers but creates a labor surplus",
+      "The floor helps all workers because everyone now earns the legal wage",
+      "The floor raises labor demand because the wage is higher",
+      "The floor is nonbinding because firms still hire some workers"
+    ],
+    "a": 0,
+    "tag": "price_floor",
+    "type": "synthesis",
+    "objective": "LO6.2",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "minimum_wage_tradeoff",
+    "secondarySkills": [],
+    "repairSkill": "minimum_wage_tradeoff",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A binding wage floor creates winners among some employed workers and losers among workers unable to find jobs."
+  },
+  {
+    "id": 9054,
+    "q": "A city caps rent below equilibrium. The advertised rent falls, but apartment searches become longer, maintenance falls, and landlords screen tenants harder. What is the best economic diagnosis?",
+    "options": [
+      "The ceiling lowers the posted price but creates shortage and nonmoney rationing",
+      "The ceiling lowers the posted price and therefore eliminates scarcity",
+      "The ceiling raises quantity supplied and creates seller competition",
+      "The ceiling is nonbinding because landlords still choose tenant quality"
+    ],
+    "a": 0,
+    "tag": "price_ceiling",
+    "type": "synthesis",
+    "objective": "LO6.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ceiling_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "ceiling_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The posted money price is only part of the cost. Binding ceilings create shortage and hidden rationing costs."
+  },
+  {
+    "id": 9055,
+    "q": "Refer to the tax graph. Before the tax, equilibrium is $15 and 100 units. After the tax, buyers pay $18, sellers receive $12, and quantity is 80. What is the per-unit tax?",
+    "options": [
+      "$6 per unit",
+      "$3 per unit",
+      "$18 per unit",
+      "$12 per unit"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "graph_calculation",
+    "objective": "LO6.3",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_wedge_calculation",
+    "secondarySkills": [],
+    "repairSkill": "tax_wedge_calculation",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The wedge is buyer price minus seller price: $18 - $12 = $6.",
+    "image": "taxincidence.png"
+  },
+  {
+    "id": 9056,
+    "q": "Refer to the tax graph. After the tax, buyers pay $18 and sellers receive $12. Compared with the original $15 equilibrium price, how is the burden split?",
+    "options": [
+      "Buyers bear $3 and sellers bear $3 per unit",
+      "Buyers bear $6 and sellers bear $0 per unit",
+      "Buyers bear $0 and sellers bear $6 per unit",
+      "Buyers bear $18 and sellers bear $12 per unit"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "graph_calculation",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_burden_split",
+    "secondarySkills": [],
+    "repairSkill": "tax_burden_split",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Buyers pay $3 more than before and sellers receive $3 less than before.",
+    "image": "taxincidence.png"
+  },
+  {
+    "id": 9057,
+    "q": "Refer to the tax graph. What happens to market size after the tax is imposed?",
+    "options": [
+      "Quantity falls from 100 to 80 because the tax creates a wedge",
+      "Quantity rises from 80 to 100 because the tax raises buyer price",
+      "Quantity stays at 100 because tax revenue replaces lost trades",
+      "Quantity rises to 150 because sellers receive the old price"
+    ],
+    "a": 0,
+    "tag": "tax",
+    "type": "graph_interpretation",
+    "objective": "LO6.3",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_quantity_effect",
+    "secondarySkills": [],
+    "repairSkill": "tax_quantity_effect",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A tax creates a wedge that reduces quantity traded.",
+    "image": "taxincidence.png"
+  },
+  {
+    "id": 9058,
+    "q": "Refer to the tax graph. How much tax revenue is collected after the tax?",
+    "options": [
+      "$480",
+      "$300",
+      "$600",
+      "$1,200"
+    ],
+    "a": 0,
+    "tag": "tax",
+    "type": "graph_calculation",
+    "objective": "LO6.3",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_revenue_calculation",
+    "secondarySkills": [],
+    "repairSkill": "tax_revenue_calculation",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Tax revenue equals tax per unit times quantity sold: $6 × 80 = $480.",
+    "image": "taxincidence.png"
+  },
+  {
+    "id": 9059,
+    "q": "Refer to the tax graph. Which statement correctly describes the supply + tax curve?",
+    "options": [
+      "It shows sellers require a higher buyer price at each quantity because the tax raises cost per unit",
+      "It shows buyers demand more at each price because the tax raises value per unit",
+      "It shows the original supply curve shifting right because production is cheaper",
+      "It shows the demand curve shifting right because consumers pay the tax"
+    ],
+    "a": 0,
+    "tag": "tax",
+    "type": "graph_interpretation",
+    "objective": "LO6.3",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_supply_shift",
+    "secondarySkills": [],
+    "repairSkill": "tax_supply_shift",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A seller-side tax shifts supply upward/left by the amount of the tax.",
+    "image": "taxincidence.png"
+  },
+  {
+    "id": 9060,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9061,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9062,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9063,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9064,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9065,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9066,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9067,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9068,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9069,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9070,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9071,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9072,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9073,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9074,
+    "q": "A $4 tax is placed on concert tickets. Buyers pay $2.50 more than before, sellers receive $1.50 less than before, and fewer tickets are sold. Which statement is strongest?",
+    "options": [
+      "The burden is shared, quantity falls, and the side less able to adjust bears more",
+      "The burden falls only on sellers because the legal tax is charged to sellers",
+      "The burden falls only on buyers because the buyer price increased",
+      "The burden disappears because tax revenue offsets the lower quantity sold"
+    ],
+    "a": 0,
+    "tag": "tax_incidence",
+    "type": "synthesis",
+    "objective": "LO6.5",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "tax_incidence_elasticity",
+    "secondarySkills": [],
+    "repairSkill": "tax_incidence_elasticity",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Legal responsibility for the tax does not determine economic burden. The wedge is shared and quantity falls."
+  },
+  {
+    "id": 9075,
+    "q": "A student says, 'The city should accept a small efficiency loss if the policy improves housing access for low-income renters.' What is the best classification?",
+    "options": [
+      "A normative claim using an efficiency-equity tradeoff",
+      "A positive claim measuring only what already happened",
+      "A circular-flow claim about factor payments",
+      "A supply shift caused only by lower input costs"
+    ],
+    "a": 0,
+    "tag": "positive_normative",
+    "type": "multi-step",
+    "objective": "LO2.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "positive_normative_distinction",
+    "secondarySkills": [],
+    "repairSkill": "positive_normative_distinction",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The word should and the value judgment about equity make it normative, though it uses economic reasoning."
+  },
+  {
+    "id": 9076,
+    "q": "A university raises parking fines. Students respond by arriving earlier, carpooling more, and contesting tickets more often. What principle ties these reactions together?",
+    "options": [
+      "People respond to incentives, including unintended margins of adjustment",
+      "People ignore incentives when rules are created by institutions",
+      "Opportunity cost disappears when penalties are legal",
+      "Markets allocate resources only when prices are zero"
+    ],
+    "a": 0,
+    "tag": "incentives",
+    "type": "synthesis",
+    "objective": "LO1.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "incentives_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "incentives_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A changed penalty changes behavior, including responses the policy designer may not have wanted."
+  },
+  {
+    "id": 9077,
+    "q": "An economist builds a simple two-market circular-flow model and leaves out banks, government, and foreign trade. Why can the model still be useful?",
+    "options": [
+      "It isolates key relationships by simplifying reality on purpose",
+      "It proves omitted institutions have no economic importance",
+      "It turns a normative claim into a positive law",
+      "It removes scarcity from household and firm decisions"
+    ],
+    "a": 0,
+    "tag": "models",
+    "type": "interpretation",
+    "objective": "LO2.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "model_purpose",
+    "secondarySkills": [],
+    "repairSkill": "model_purpose",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A model is useful because it strips away details to focus on the relationship being studied."
+  },
+  {
+    "id": 9078,
+    "q": "A student says, 'The city should accept a small efficiency loss if the policy improves housing access for low-income renters.' What is the best classification?",
+    "options": [
+      "A normative claim using an efficiency-equity tradeoff",
+      "A positive claim measuring only what already happened",
+      "A circular-flow claim about factor payments",
+      "A supply shift caused only by lower input costs"
+    ],
+    "a": 0,
+    "tag": "positive_normative",
+    "type": "multi-step",
+    "objective": "LO2.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "positive_normative_distinction",
+    "secondarySkills": [],
+    "repairSkill": "positive_normative_distinction",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The word should and the value judgment about equity make it normative, though it uses economic reasoning."
+  },
+  {
+    "id": 9079,
+    "q": "A university raises parking fines. Students respond by arriving earlier, carpooling more, and contesting tickets more often. What principle ties these reactions together?",
+    "options": [
+      "People respond to incentives, including unintended margins of adjustment",
+      "People ignore incentives when rules are created by institutions",
+      "Opportunity cost disappears when penalties are legal",
+      "Markets allocate resources only when prices are zero"
+    ],
+    "a": 0,
+    "tag": "incentives",
+    "type": "synthesis",
+    "objective": "LO1.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "incentives_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "incentives_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A changed penalty changes behavior, including responses the policy designer may not have wanted."
+  },
+  {
+    "id": 9080,
+    "q": "An economist builds a simple two-market circular-flow model and leaves out banks, government, and foreign trade. Why can the model still be useful?",
+    "options": [
+      "It isolates key relationships by simplifying reality on purpose",
+      "It proves omitted institutions have no economic importance",
+      "It turns a normative claim into a positive law",
+      "It removes scarcity from household and firm decisions"
+    ],
+    "a": 0,
+    "tag": "models",
+    "type": "interpretation",
+    "objective": "LO2.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "model_purpose",
+    "secondarySkills": [],
+    "repairSkill": "model_purpose",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A model is useful because it strips away details to focus on the relationship being studied."
+  },
+  {
+    "id": 9081,
+    "q": "A student says, 'The city should accept a small efficiency loss if the policy improves housing access for low-income renters.' What is the best classification?",
+    "options": [
+      "A normative claim using an efficiency-equity tradeoff",
+      "A positive claim measuring only what already happened",
+      "A circular-flow claim about factor payments",
+      "A supply shift caused only by lower input costs"
+    ],
+    "a": 0,
+    "tag": "positive_normative",
+    "type": "multi-step",
+    "objective": "LO2.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "positive_normative_distinction",
+    "secondarySkills": [],
+    "repairSkill": "positive_normative_distinction",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The word should and the value judgment about equity make it normative, though it uses economic reasoning."
+  },
+  {
+    "id": 9082,
+    "q": "A university raises parking fines. Students respond by arriving earlier, carpooling more, and contesting tickets more often. What principle ties these reactions together?",
+    "options": [
+      "People respond to incentives, including unintended margins of adjustment",
+      "People ignore incentives when rules are created by institutions",
+      "Opportunity cost disappears when penalties are legal",
+      "Markets allocate resources only when prices are zero"
+    ],
+    "a": 0,
+    "tag": "incentives",
+    "type": "synthesis",
+    "objective": "LO1.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "incentives_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "incentives_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A changed penalty changes behavior, including responses the policy designer may not have wanted."
+  },
+  {
+    "id": 9083,
+    "q": "An economist builds a simple two-market circular-flow model and leaves out banks, government, and foreign trade. Why can the model still be useful?",
+    "options": [
+      "It isolates key relationships by simplifying reality on purpose",
+      "It proves omitted institutions have no economic importance",
+      "It turns a normative claim into a positive law",
+      "It removes scarcity from household and firm decisions"
+    ],
+    "a": 0,
+    "tag": "models",
+    "type": "interpretation",
+    "objective": "LO2.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "model_purpose",
+    "secondarySkills": [],
+    "repairSkill": "model_purpose",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A model is useful because it strips away details to focus on the relationship being studied."
+  },
+  {
+    "id": 9084,
+    "q": "A student says, 'The city should accept a small efficiency loss if the policy improves housing access for low-income renters.' What is the best classification?",
+    "options": [
+      "A normative claim using an efficiency-equity tradeoff",
+      "A positive claim measuring only what already happened",
+      "A circular-flow claim about factor payments",
+      "A supply shift caused only by lower input costs"
+    ],
+    "a": 0,
+    "tag": "positive_normative",
+    "type": "multi-step",
+    "objective": "LO2.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "positive_normative_distinction",
+    "secondarySkills": [],
+    "repairSkill": "positive_normative_distinction",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The word should and the value judgment about equity make it normative, though it uses economic reasoning."
+  },
+  {
+    "id": 9085,
+    "q": "A university raises parking fines. Students respond by arriving earlier, carpooling more, and contesting tickets more often. What principle ties these reactions together?",
+    "options": [
+      "People respond to incentives, including unintended margins of adjustment",
+      "People ignore incentives when rules are created by institutions",
+      "Opportunity cost disappears when penalties are legal",
+      "Markets allocate resources only when prices are zero"
+    ],
+    "a": 0,
+    "tag": "incentives",
+    "type": "synthesis",
+    "objective": "LO1.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "incentives_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "incentives_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A changed penalty changes behavior, including responses the policy designer may not have wanted."
+  },
+  {
+    "id": 9086,
+    "q": "An economist builds a simple two-market circular-flow model and leaves out banks, government, and foreign trade. Why can the model still be useful?",
+    "options": [
+      "It isolates key relationships by simplifying reality on purpose",
+      "It proves omitted institutions have no economic importance",
+      "It turns a normative claim into a positive law",
+      "It removes scarcity from household and firm decisions"
+    ],
+    "a": 0,
+    "tag": "models",
+    "type": "interpretation",
+    "objective": "LO2.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "model_purpose",
+    "secondarySkills": [],
+    "repairSkill": "model_purpose",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A model is useful because it strips away details to focus on the relationship being studied."
+  },
+  {
+    "id": 9087,
+    "q": "A student says, 'The city should accept a small efficiency loss if the policy improves housing access for low-income renters.' What is the best classification?",
+    "options": [
+      "A normative claim using an efficiency-equity tradeoff",
+      "A positive claim measuring only what already happened",
+      "A circular-flow claim about factor payments",
+      "A supply shift caused only by lower input costs"
+    ],
+    "a": 0,
+    "tag": "positive_normative",
+    "type": "multi-step",
+    "objective": "LO2.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "positive_normative_distinction",
+    "secondarySkills": [],
+    "repairSkill": "positive_normative_distinction",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The word should and the value judgment about equity make it normative, though it uses economic reasoning."
+  },
+  {
+    "id": 9088,
+    "q": "A university raises parking fines. Students respond by arriving earlier, carpooling more, and contesting tickets more often. What principle ties these reactions together?",
+    "options": [
+      "People respond to incentives, including unintended margins of adjustment",
+      "People ignore incentives when rules are created by institutions",
+      "Opportunity cost disappears when penalties are legal",
+      "Markets allocate resources only when prices are zero"
+    ],
+    "a": 0,
+    "tag": "incentives",
+    "type": "synthesis",
+    "objective": "LO1.4",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "incentives_unintended_consequences",
+    "secondarySkills": [],
+    "repairSkill": "incentives_unintended_consequences",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A changed penalty changes behavior, including responses the policy designer may not have wanted."
+  },
+  {
+    "id": 9089,
+    "q": "An economist builds a simple two-market circular-flow model and leaves out banks, government, and foreign trade. Why can the model still be useful?",
+    "options": [
+      "It isolates key relationships by simplifying reality on purpose",
+      "It proves omitted institutions have no economic importance",
+      "It turns a normative claim into a positive law",
+      "It removes scarcity from household and firm decisions"
+    ],
+    "a": 0,
+    "tag": "models",
+    "type": "interpretation",
+    "objective": "LO2.1",
+    "difficulty": "legendary",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "model_purpose",
+    "secondarySkills": [],
+    "repairSkill": "model_purpose",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A model is useful because it strips away details to focus on the relationship being studied."
+  }
+],
+
+legendaryBoss: [
+  {
+    "id": 9000,
+    "q": "Refer to the PPF graph. A move from B to C changes production from about 8 X and 45 Y to 15 X and 35 Y. Which answer best states the tradeoff?",
+    "options": [
+      "Gain 7 units of X while giving up 10 units of Y",
+      "Gain 10 units of X while giving up 7 units of Y",
+      "Gain 7 units of Y while giving up 10 units of X",
+      "Gain 10 units of Y while giving up 7 units of X"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_calculation",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "ppf_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "From B to C, X rises from 8 to 15 and Y falls from 45 to 35, so the tradeoff is +7 X for -10 Y.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9001,
+    "q": "Refer to the PPF graph. Which statement best compares points F and G?",
+    "options": [
+      "F is attainable but inefficient, while G is unattainable with current resources",
+      "F is unattainable with current resources, while G is attainable but inefficient",
+      "F and G are both efficient because neither is on an axis",
+      "F and G are both inefficient because neither lies on the frontier"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_interpretation",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_efficiency_status",
+    "secondarySkills": [],
+    "repairSkill": "ppf_efficiency_status",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Inside the PPF is attainable but inefficient; outside the PPF is unattainable with current resources.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9002,
+    "q": "Refer to the PPF graph. A move from C to D increases Good X from 15 to 21 while Good Y falls from 35 to 20. What is the opportunity cost per additional X?",
+    "options": [
+      "2.5 units of Y per unit of X",
+      "0.4 units of Y per unit of X",
+      "6 units of Y per unit of X",
+      "15 units of Y per unit of X"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_calculation",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "ppf_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The economy gives up 15 Y to gain 6 X, so 15/6 = 2.5 Y per X.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9003,
+    "q": "Refer to the PPF graph. If the economy is at F, which move most directly shows improved use of currently idle resources rather than economic growth?",
+    "options": [
+      "Move from F to B on the existing frontier",
+      "Move from B to G beyond the existing frontier",
+      "Move from A to E along the existing frontier",
+      "Move from C to D along the existing frontier"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_interpretation",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "ppf_efficiency_status",
+    "secondarySkills": [],
+    "repairSkill": "ppf_efficiency_status",
+    "commonError": "legendary_near_match_error",
+    "feedback": "Moving from inside the frontier to the frontier uses idle resources more efficiently. Growth would shift the frontier outward.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9004,
+    "q": "Refer to the PPF graph. Why does the opportunity cost of Good X rise as production moves from A toward E?",
+    "options": [
+      "Resources are increasingly less suited to producing additional X",
+      "Resources become perfectly adaptable between X and Y",
+      "The economy has escaped scarcity by moving along the curve",
+      "The money price of X must fall as X production rises"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "graph_interpretation",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A bowed-out PPF reflects increasing opportunity cost because resources are not equally suited to both goods.",
+    "image": "ppf.png"
+  },
+  {
+    "id": 9005,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9006,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9007,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9008,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9009,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9010,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9011,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9012,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9013,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9014,
+    "q": "A planner can produce more emergency generators only by pulling engineers away from water-system repairs. The first 10 generators cost 2 repairs, but the next 10 cost 6 repairs. What is the best interpretation of this production choice?",
+    "options": [
+      "Opportunity cost rises because resources are not equally adaptable across uses",
+      "Opportunity cost falls because the planner learns to produce generators faster",
+      "Opportunity cost disappears because both outputs are public priorities",
+      "Opportunity cost is only the dollar wage paid to the engineers"
+    ],
+    "a": 0,
+    "tag": "ppf",
+    "type": "multi-step",
+    "objective": "LO2.2",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "increasing_opportunity_cost",
+    "secondarySkills": [],
+    "repairSkill": "increasing_opportunity_cost",
+    "commonError": "legendary_near_match_error",
+    "feedback": "The increasing repair sacrifice shows increasing opportunity cost, not just a money-cost problem."
+  },
+  {
+    "id": 9015,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. Starting at D1 and S1, demand increases to D2 while supply stays at S1. What happens?",
+    "options": [
+      "Equilibrium moves from Q1/P2 to Q2/P3",
+      "Equilibrium moves from Q2/P1 to Q3/P2",
+      "Equilibrium moves from Q1/P2 to Q2/P1",
+      "Equilibrium moves from Q3/P2 to Q2/P3"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "graph_interpretation",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "market_shift_analysis",
+    "secondarySkills": [],
+    "repairSkill": "market_shift_analysis",
+    "commonError": "legendary_near_match_error",
+    "feedback": "With supply at S1, a demand increase from D1 to D2 raises both equilibrium price and quantity.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9019,
+    "q": "Refer to the supply and demand graph with D1, D2, S1, and S2. If both demand and supply increase from D1/S1 to D2/S2, what outcome is shown in this particular graph?",
+    "options": [
+      "Quantity rises from Q1 to Q3 while price stays at P2",
+      "Quantity stays at Q1 while price rises from P1 to P3",
+      "Quantity falls from Q3 to Q1 while price stays at P2",
+      "Quantity rises from Q1 to Q2 while price falls to P1"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "graph_integration",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "In this drawn case, both shifts raise quantity, while price remains at P2.",
+    "image": "supplydemand1.png"
+  },
+  {
+    "id": 9020,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9021,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9022,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9023,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9024,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9025,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9026,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9027,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9028,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9029,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9030,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9031,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  },
+  {
+    "id": 9032,
+    "q": "A drought destroys part of the orange crop at the same time a health report increases consumer interest in orange juice. Which conclusion is strongest without exact curve sizes?",
+    "options": [
+      "Equilibrium quantity is ambiguous, while equilibrium price rises",
+      "Equilibrium price is ambiguous, while equilibrium quantity rises",
+      "Both equilibrium price and quantity must fall",
+      "Both equilibrium price and quantity must stay unchanged"
+    ],
+    "a": 0,
+    "tag": "equilibrium",
+    "type": "multi-step",
+    "objective": "LO4.4",
+    "difficulty": "legendaryBoss",
+    "conceptCluster": "legendary_market_gate",
+    "primarySkill": "simultaneous_shifts",
+    "secondarySkills": [],
+    "repairSkill": "simultaneous_shifts",
+    "commonError": "legendary_near_match_error",
+    "feedback": "A supply decrease raises price and lowers quantity; a demand increase raises both price and quantity. Price rises, quantity is ambiguous."
+  }
+],
 easyBoss: [
   // --- OPPORTUNITY COST ---
   { id: 2000, q: "The Frontier Keeper opens the first gate: 'Every choice has a shadow.' What is opportunity cost?", options: ["The value of the next best alternative given up", "Only the money price paid", "The total amount spent on all choices", "The legal maximum price"], a: 0, tag: "opportunity_cost", type: "definition", objective: "LO1.2", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "opportunity_cost_definition", secondarySkills: ["tradeoff_identification"], repairSkill: "opportunity_cost_definition", commonError: "treats_opportunity_cost_as_only_money_cost", feedback: "Opportunity cost is the value of the next best alternative given up." },
@@ -5357,7 +7929,7 @@ function loadQuestion() {
    }
     
     // --- MUSIC CONTROL ---
-    if(diff === "finalBoss"){
+    if(diff === "finalBoss" || (diff === "legendaryBoss" && room === 30)){
         playFinalBossMusic();
         }
     else if(diff.includes("Boss")){
@@ -5478,7 +8050,32 @@ function loadQuestion() {
     const weakestTag = getWeakestTag();
     adaptiveMode = purpose;
 
-    if(diff === "easy" && profile.mediumReady){
+    if(gameMode === "legendary"){
+        adaptiveMode = "legendary";
+        currentQuestion = shuffleOptions(
+            getAdaptiveQuestion("legendary", strongestTag || weakestTag, {
+                mode: "challenge",
+                preferredTypes: ELITE_PREFERRED_TYPES,
+                purpose: "stretch"
+            })
+        );
+
+        if(currentQuestion.image){
+            imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+            imageBox.style.display = "block";
+        }
+
+        if(!currentQuestion.type){ currentQuestion.type = "synthesis"; }
+        wizardSpeak(getWizardLine(currentQuestion.type));
+
+        bossMsg.innerText = (room === 9 || room === 19 || room === 29)
+            ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️"
+            : "";
+        bossMsg.style.color = "#f97316";
+
+        questionElement.innerHTML = `<div>${currentQuestion.q}</div>`;
+    }
+    else if(diff === "easy" && profile.mediumReady){
         adjustedDiff = "medium";
     }
 
@@ -5538,8 +8135,8 @@ if(currentQuestion.image){
     wizardSpeak(wizardText);
 
     // --- UI ---
-    bossMsg.innerText = (gameMode === "standard" && (room === 9 || room === 19 || room === 29))
-        ? "⚠️ DANGER: BOSS DETECTED IN NEXT ROOM ⚠️"
+    bossMsg.innerText = ((gameMode === "standard" || gameMode === "legendary") && (room === 9 || room === 19 || room === 29))
+        ? (gameMode === "legendary" ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️" : "⚠️ DANGER: BOSS DETECTED IN NEXT ROOM ⚠️")
         : "";
     bossMsg.style.color = "#ef4444";
 
@@ -6012,7 +8609,7 @@ if(remediationState.active){
 }
 
 // --- STAGED REMEDIATION TRIGGER ---
-if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(currentQuestion)) {
+if (gameMode !== "legendary" && !remediationState.active && currentQuestion.tag && shouldTriggerDetour(currentQuestion)) {
     remediationState = planRemediation(currentQuestion, responseTime) || remediationState;
     detourActive = true;
     detourReturnRoom = room;
@@ -6354,6 +8951,79 @@ if(bossRoom === 30){
 }
 
 
+function handleLegendaryVictory(){
+    stopTimedModeClock();
+    localStorage.setItem("economicRealm_marketGate_legendary_complete", "true");
+    localStorage.setItem("marketGateLegendaryComplete", "true");
+    clearSavedGame();
+
+    bgMusic.pause();
+    bossMusic.pause();
+    finalBossMusic.pause();
+    if (typeof sfxVictory !== 'undefined') {
+        sfxVictory.currentTime = 0;
+        sfxVictory.play();
+    }
+
+    const totalTimeMs = Date.now() - startTime;
+    const timeString = formatTime(totalTimeMs);
+    const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
+    const verificationCode = generateCode(username + "|LEGENDARY", accuracy, maxStreak, totalTimeMs);
+
+    sendGameData({
+        runID: runID,
+        game: "The Market Gate",
+        event: "legendary_complete",
+        user: username,
+        email: studentEmail,
+        room: room,
+        questionId: 0,
+        correct: 1,
+        tag: "",
+        type: "",
+        objective: "",
+        responseTime: 0,
+        attempt: totalAttempts,
+        streak: streak,
+        elapsedTime: totalTimeMs,
+        adaptiveMode: "legendary_complete",
+        totalTime: totalTimeMs,
+        accuracy: accuracy / 100,
+        maxStreak: maxStreak,
+        totalAttempts: totalAttempts,
+        verificationCode: verificationCode
+    });
+
+    let judgment = "You cleared Legendary Mode. That means you survived the full Market Gate with multi-step items, graph pressure, close answers, and no soft landing.";
+    if(accuracy >= 90){
+        judgment = "Legendary run confirmed. You did not just recognize terms. You read the models, tracked the traps, and handled the pressure.";
+    } else if(accuracy < 75){
+        judgment = "You survived Legendary Mode, but the Gate left dents. Completion counts. Mastery still needs another run.";
+    }
+
+    document.getElementById("bossMessage").innerText = "";
+    document.getElementById("formulaHint").innerText = "";
+    document.getElementById("artifactDrop").style.display = "none";
+
+    document.getElementById("question").innerHTML = `
+        <span class="boss-title">LEGENDARY MODE COMPLETE</span>
+        <div class="boss-q">
+            ${judgment}<br><br>
+            Accuracy: ${accuracy}%<br>
+            Total Attempts: ${totalAttempts}<br>
+            Best Streak: ${maxStreak}<br>
+            Total Time: ${timeString}<br>
+            Verification Code: <strong>${verificationCode}</strong>
+        </div>
+    `;
+
+    document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
+    `;
+
+    document.getElementById("message").innerText = "Legendary completion saved separately. Standard realm progress was not changed.";
+}
+
 function handlePracticeModeComplete(){
     stopTimedModeClock();
 
@@ -6483,7 +9153,11 @@ function generateCode(name, acc, streak, total){
 // =============================================     
 function handleVictory() {
     if(!modeAllowsRealmProgress()){
-        handlePracticeModeComplete();
+        if(gameMode === "legendary"){
+            handleLegendaryVictory();
+        } else {
+            handlePracticeModeComplete();
+        }
         return;
     }
 
