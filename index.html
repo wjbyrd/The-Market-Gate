@@ -7067,6 +7067,7 @@ function sendGameData(data) {
     streak: Number(data.streak ?? 0),
     elapsedTime: Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
     adaptiveMode: data.adaptiveMode || adaptiveMode || "",
+	mode: data.mode || gameMode || "standard",
     totalTime: Number(data.totalTime ?? data.totalTimeMs ?? 0),
     accuracy: Number(data.accuracy ?? 0),
     maxStreak: Number(data.maxStreak ?? 0),
