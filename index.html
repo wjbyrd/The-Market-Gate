@@ -5585,95 +5585,108 @@ function loadQuestion() {
     document.getElementById("srAnnouncements").innerText = `Entering ${getModeDisplayName()}. ${getAreaName(roomCap)}. Room ${roomCap} of 30.`;
 
     // 3. Select the Question (CHANGE BOSS NAMES AND PNG)
-    if (isBoss) {
-        // 1. If it's a new fight (Health 3), decide the "Theme" of the boss
-        if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
-            const bank = [...questionBanks[diff]];
-		  	let chosenTag = getWeakestTag();
+if (isBoss) {
+    // 1. If it's a new fight, build a three-question boss pool
+    if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
+        const bank = [...questionBanks[diff]];
+        let chosenTag = getWeakestTag();
 
-			const bossTags = [...new Set(bank.map(q => q.tag))];
+        const bossTags = [...new Set(bank.map(q => q.tag).filter(Boolean))];
 
-			const eligibleTags = bossTags.filter(tag =>
-    			bank.filter(q => q.tag === tag).length >= 3
-			);
+        const eligibleTags = bossTags.filter(tag =>
+            bank.filter(q => q.tag === tag).length >= 3
+        );
 
-			let candidatePool = chosenTag
-   			 ? bank.filter(q => q.tag === chosenTag)
-  			  : [];
+        let candidatePool = chosenTag
+            ? bank.filter(q => q.tag === chosenTag)
+            : [];
 
-			// If the selected weak tag does not support a full boss set,
-			// choose a valid boss theme instead.
-			if (candidatePool.length < 3) {
-    		const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
-    			candidatePool = bank.filter(q => q.tag === randomTag);
-			}
-
-			bossPool = candidatePool.slice(0, 3);
+        // If weakest tag cannot support a full boss set, choose another valid tag.
+        if (candidatePool.length < 3 && eligibleTags.length > 0) {
+            const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
+            candidatePool = bank.filter(q => q.tag === randomTag);
         }
 
-        // 2. Select the specific question based on boss health
-        currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
+        // Last-resort fallback: use any available questions from this difficulty.
+        if (candidatePool.length < 3) {
+            candidatePool = bank.filter(q => {
+                if (!q) return false;
+                if (usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
+                return true;
+            });
+        }
 
-		if(currentQuestion.image){
-   		imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
-   		imageBox.style.display = "block";
-		}
+        // If used-question filtering leaves too few, reset and use the whole bank.
+        if (candidatePool.length < 3) {
+            if (usedQuestions[diff]) usedQuestions[diff] = [];
+            candidatePool = [...bank];
+        }
 
-// 3. Boss Identity UI — Market Gate
-	let bTitle = room === 10 ? "THE FRONTIER KEEPER"
-   	    : room === 20 ? "THE SIGNAL BROKER"
-   	    : "THE PRICE MAGISTRATE";
+        bossPool = shuffle([...candidatePool]).slice(0, 3);
 
-	let bColor = room === 10 ? "#d7b35a"   // Frontier Compass / old gold
- 	   : room === 20 ? "#38bdf8"          // Signal Lens / market blue
-  	   : "#f0c86a";                       // Magistrate's Scales / civic gold
+        if (usedQuestions[diff]) {
+            bossPool.forEach(q => {
+                if (q && !usedQuestions[diff].includes(q.id)) {
+                    usedQuestions[diff].push(q.id);
+                }
+            });
+        }
+    }
 
-	document.getElementById("srAnnouncements").innerText =
-  	  `Boss encounter. ${bTitle}. Prepare yourself`;
+    // 2. Select the specific question based on boss health
+    currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
 
-	bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
-	bossMsg.style.color = bColor;
-	gameBox.style.setProperty('--bossColor', bColor);
-		
-        let bossImage = "";
-        let bossClass = "";
+    if (currentQuestion.image) {
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+        imageBox.style.display = "block";
+    } else {
+        imageBox.innerHTML = "";
+        imageBox.style.display = "none";
+    }
 
-// =============================================
-// BOSS VISUAL CONFIGURATION — SAFE TO EDIT
-// =============================================
-// Change:
-// - boss images
-// - boss class
-//
-// Keep room numbers (10, 20, 30) intact.
-// =============================================
-        
-    if(room === 10){
+    // 3. Boss Identity UI — Market Gate
+    let bTitle = room === 10 ? "THE FRONTIER KEEPER"
+        : room === 20 ? "THE SIGNAL BROKER"
+        : "THE PRICE MAGISTRATE";
+
+    let bColor = room === 10 ? "#d7b35a"
+        : room === 20 ? "#38bdf8"
+        : "#f0c86a";
+
+    document.getElementById("srAnnouncements").innerText =
+        `Boss encounter. ${bTitle}. Prepare yourself`;
+
+    bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
+    bossMsg.style.color = bColor;
+    gameBox.style.setProperty("--bossColor", bColor);
+
+    let bossImage = "";
+    let bossClass = "";
+
+    if (room === 10) {
         bossImage = "keeper.png";
         bossClass = "keeperGlow";
     }
-    else if(room === 20){
+    else if (room === 20) {
         bossImage = "broker.png";
         bossClass = "brokerGlow";
     }
-    else{
+    else {
         bossImage = "magistrate.png";
         bossClass = "magistrateGlow";
     }
 
-        questionElement.innerHTML = `
-            <img src="${bossImage}" class="bossIcon ${bossClass}">
-            <span class="boss-title" style="color:${bColor}">${bTitle}</span>
-            <div class="boss-q" style="--bossColor:${bColor}">
-                ${currentQuestion.q}
-            </div>`;
+    questionElement.innerHTML = `
+        <img src="${bossImage}" class="bossIcon ${bossClass}">
+        <span class="boss-title" style="color:${bColor}">${bTitle}</span>
+        <div class="boss-q" style="--bossColor:${bColor}">
+            ${currentQuestion.q}
+        </div>`;
 
-        // 4. THE CORRECT PLACEMENT OF RETURN
-        // We draw the UI first, THEN we exit the function.
-        displayQuestion(); 
-        return; 
+    displayQuestion();
+    return;
 
-    } else {
+} else {
 
     // --- STREAK + MASTERY ADAPTIVE LOGIC ---
     let adjustedDiff = diff;
