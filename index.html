@@ -21,10 +21,8 @@ This file is divided into TWO zones:
     localStorage.setItem("marketGateTimedLastAttempts", String(totalAttempts));
     localStorage.setItem("marketGateTimedLastStreak", String(maxStreak));
 
-    const bestRoom = Number(localStorage.getItem("marketGateTimedBestRoom") || 0);
-    if(room > bestRoom){
-        localStorage.setItem("marketGateTimedBestRoom", String(room));
-    }
+    const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
+    recordTimedTrialAchievementStats(accuracy, reachedRoom);
 
     returnToModeSelectFromRun();
 }
@@ -2400,6 +2398,15 @@ let timedModeTimerInterval = null;
 let timedHighestRoom = 1;
 let timedSetbacks = 0;
 
+// =============================================
+// REALM ACHIEVEMENT TRACKING
+// These keys are read by The Economic Realm hub.
+// Keep this small and boring. Boring means it works.
+// =============================================
+let resumedSavedRunThisSession = false;
+let bossMistakeCountThisRun = 0;
+let bossesDefeatedThisRun = 0;
+
 function modeAllowsSave(){
     return gameMode === "standard" || gameMode === "legendary";
 }
@@ -2428,6 +2435,38 @@ function getModeDisplayName(){
     return "Standard Campaign";
 }
 
+function addRealmStat(key, amount = 1){
+    const current = parseInt(localStorage.getItem(key) || "0", 10);
+    localStorage.setItem(key, String((Number.isFinite(current) ? current : 0) + amount));
+}
+
+function setRealmFlag(key){
+    localStorage.setItem(key, "true");
+}
+
+function updateRealmMaxStat(key, value){
+    const numericValue = Number(value || 0);
+    const current = parseInt(localStorage.getItem(key) || "0", 10);
+
+    if(Number.isFinite(numericValue) && numericValue > (Number.isFinite(current) ? current : 0)){
+        localStorage.setItem(key, String(numericValue));
+    }
+}
+
+function recordTimedTrialAchievementStats(accuracy, reachedRoom){
+    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
+    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
+
+    updateRealmMaxStat("marketGateTimedBestRoom", safeRoom);
+    updateRealmMaxStat("marketGateTimedBestAccuracy", safeAccuracy);
+    updateRealmMaxStat("economicRealm_marketGate_timedBestRoom", safeRoom);
+    updateRealmMaxStat("economicRealm_marketGate_timedBestAccuracy", safeAccuracy);
+
+    if(safeRoom >= 30 && safeAccuracy >= 80){
+        setRealmFlag("economicRealm_marketGate_trial_by_clock_complete");
+    }
+}
+
 function saveGameState(){
     if(!modeAllowsSave()) return;
 
@@ -2451,6 +2490,11 @@ function saveGameState(){
         usedQuestions,
         questionHistory,
         savedAt: Date.now(),
+
+        achievementTracking: {
+            bossMistakeCountThisRun,
+            bossesDefeatedThisRun
+        },
 
         artifacts: {
             vaultCompass: localStorage.getItem("vaultCompass") === "true",
@@ -2502,6 +2546,9 @@ function loadSavedGame(){
 
         usedQuestions = saveData.usedQuestions || usedQuestions;
         questionHistory = saveData.questionHistory || questionHistory;
+
+        bossMistakeCountThisRun = Number(saveData.achievementTracking?.bossMistakeCountThisRun || 0);
+        bossesDefeatedThisRun = Number(saveData.achievementTracking?.bossesDefeatedThisRun || 0);
 
         if(saveData.artifacts?.vaultCompass) localStorage.setItem("vaultCompass", "true");
         if(saveData.artifacts?.vaultLens) localStorage.setItem("vaultLens", "true");
@@ -3834,6 +3881,7 @@ function startNewRun(){
 
 function continueSavedRun(){
     gameMode = "standard";
+    resumedSavedRunThisSession = true;
     startGame(true);
 }
 
@@ -3886,6 +3934,9 @@ function startGame(shouldResume = false) {
    username = generatePseudonymFromEmail(studentEmail);
 
 const hasSavedRun = shouldResume ? loadSavedGame() : false;
+if(!hasSavedRun){
+    resumedSavedRunThisSession = false;
+}
 
 if(!hasSavedRun){
     bossCheckpoint = 1;
@@ -3932,6 +3983,8 @@ if(!hasSavedRun){
 	rapidGuessHistory = [];
 	rapidGuessWarnings = 0;
 	rapidGuessLocked = false;
+    bossMistakeCountThisRun = 0;
+    bossesDefeatedThisRun = 0;
 
     if(modeAllowsSave()){
         localStorage.removeItem("gauntletRoom");
@@ -4017,6 +4070,9 @@ function resetRunStateForNewMode(){
     rapidGuessLocked = false;
     timedHighestRoom = 1;
     timedSetbacks = 0;
+    bossMistakeCountThisRun = 0;
+    bossesDefeatedThisRun = 0;
+    resumedSavedRunThisSession = false;
 
     questionHistory = {
         easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [],
@@ -4123,6 +4179,8 @@ function endTimedModeRun(){
     localStorage.setItem("marketGateTimedLastAttempts", String(totalAttempts));
     localStorage.setItem("marketGateTimedLastStreak", String(maxStreak));
     localStorage.setItem("marketGateTimedLastSetbacks", String(timedSetbacks));
+
+    recordTimedTrialAchievementStats(accuracy, timedHighestRoom);
 
     sendGameData({
         runID: runID,
@@ -5975,6 +6033,8 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
     if (isCorrect) {
         streak++;
         if (streak > maxStreak) maxStreak = streak;
+        updateRealmMaxStat("economicRealm_bestStreak", maxStreak);
+        updateRealmMaxStat("economicRealm_marketGate_bestStreak", maxStreak);
     } else {
         streak = 0;
     }
@@ -6028,6 +6088,8 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         },200);
 
 		correctAnswers++;
+        addRealmStat("economicRealm_totalCorrectAnswers", 1);
+        addRealmStat("economicRealm_marketGate_correctTotal", 1);
         handleStreakVisuals();
        
         // --- STAGED REMEDIATION SUCCESS PATH ---
@@ -6139,6 +6201,10 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
          });
            
          bossPool = [];
+
+         if(gameMode === "standard"){
+             bossesDefeatedThisRun++;
+         }
            
        // Boss defeated — Market Gate boss artifacts
 if(modeAllowsRealmProgress()){
@@ -6191,6 +6257,9 @@ if(modeAllowsRealmProgress()){
        
     if (isBossRoom) {
         sfxWrong.volume = 0.7;
+        if(gameMode === "standard"){
+            bossMistakeCountThisRun++;
+        }
     } else {
         sfxWrong.volume = 0.5;
     }
@@ -6677,6 +6746,11 @@ function handlePracticeModeComplete(){
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
 
+    if(gameMode === "exam"){
+        setRealmFlag("economicRealm_marketGate_exam_complete");
+        setRealmFlag("marketGateExamComplete");
+    }
+
     sendGameData({
         runID: runID,
         game: "The Market Gate",
@@ -6811,6 +6885,16 @@ function handleVictory() {
 	localStorage.setItem(REALM_COMPLETE_KEY, "true");
 	localStorage.setItem(REALM_STATUS_KEY, "restored");
 	localStorage.setItem(REALM_ROOM_KEY, "30");
+    localStorage.setItem(`economicRealm_${REALM_MISSION_KEY}_artifactsCollected`, "3");
+
+    if(resumedSavedRunThisSession){
+        setRealmFlag(`economicRealm_${REALM_MISSION_KEY}_resume_finish_complete`);
+        setRealmFlag("economicRealm_returnAndRebuild_complete");
+    }
+
+    if(bossesDefeatedThisRun >= 3 && bossMistakeCountThisRun === 0){
+        setRealmFlag(`economicRealm_${REALM_MISSION_KEY}_perfect_calibration_complete`);
+    }
 	
 	clearSavedGame();
 	bgMusic.pause();
@@ -7113,6 +7197,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
