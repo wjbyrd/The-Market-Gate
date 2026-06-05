@@ -265,6 +265,7 @@ body::after{
     position: relative;
 }
 
+/* Boss state styling — triggered during boss fights (DO NOT REMOVE) */
 #gameBox.boss-mode {
     border: 2px solid rgba(247,217,130,0.88);
     box-shadow:
@@ -301,6 +302,7 @@ body::after{
         drop-shadow(0 0 25px rgba(56,189,248,0.62));
 }
 
+/* Damage effect when boss/player is hit (visual feedback) */	
 .hit {
     box-shadow:
         0 0 52px rgba(185,28,28,0.64),
@@ -309,6 +311,7 @@ body::after{
     animation: hitshake 0.4s ease;
 }
 
+/* Autosave indicator — positioned relative to gameBox */	
 #autosave {
     position: absolute;
     top: 15px;
@@ -320,6 +323,7 @@ body::after{
     text-shadow: 0 0 6px rgba(56,189,248,0.42);
 }
 
+/* Adds a graph box for questions with graphs */	
 #questionImageBox{
     margin: 0 auto 12px auto;
     text-align: center;
@@ -350,6 +354,7 @@ h2 {
     margin-bottom: 5px;
 }
 
+/* Main question text — keep readable and centered */	
 #question {
     font-size: clamp(20px, 4vw, 22px);
     line-height: 1.4;
@@ -361,6 +366,7 @@ h2 {
         0 0 8px rgba(56,189,248,0.14);
 }
 
+/* Boss/summary title — high emphasis text */	
 .boss-title {
     font-size: 28px;
     font-weight: bold;
@@ -373,6 +379,7 @@ h2 {
         0 3px 8px rgba(0,0,0,0.92);
 }
 
+/* Area/zone label — subtle contextual info */	
 .area-title {
     color: #c7ecff;
     font-size: 14px;
@@ -384,6 +391,7 @@ h2 {
         0 2px 5px rgba(0,0,0,0.88);
 }
 
+/* Boss summary text — left-aligned for readability */	
 .boss-q {
     font-style: normal;
     line-height: 1.5;
@@ -397,6 +405,7 @@ h2 {
     text-shadow: 0 2px 5px rgba(0,0,0,0.88);
 }
 
+/* Optional hint display (calculation or guidance) */	
 .hint-box {
     font-size: 13px;
     color: #f7d982;
@@ -407,7 +416,8 @@ h2 {
         0 0 6px rgba(247,217,130,0.30),
         0 0 12px rgba(56,189,248,0.16);
 }
-    
+
+/* Temporary feedback text (auto fades out) */	
 .fade-out-text {
     animation: fadeOut 5s forwards;
     font-weight: bold;
@@ -418,6 +428,7 @@ h2 {
         0 2px 5px rgba(0,0,0,0.88);
 }
 
+/* Add styling to Chancellor text */	
 #message {
     margin-top: 10px;
     font-style: italic;
@@ -450,42 +461,40 @@ h2 {
    4. BUTTONS & INTERACTION
 ========================================= */
 
+/* Base button styling — applies to all buttons */
 button {
     padding: 12px 22px;
     margin: 6px;
     font-size: 16px;
     cursor: pointer;
-
     background: linear-gradient(180deg, #12304f, #04101f);
     color: #eef6ff;
-
     border: 1px solid rgba(56,189,248,0.36);
     border-radius: 8px;
-
     box-shadow:
        0 0 12px rgba(56,189,248,0.20),
        0 0 24px rgba(15,23,42,0.54),
        inset 0 0 10px rgba(0,0,0,0.74);
-
     transition: all 0.15s ease;
 }
-
+	
+/* Hover feedback — improves interactivity */
 button:hover {
     background: linear-gradient(180deg, #1d4d73, #0b2238);
     border-color: rgba(247,217,130,0.72);
-
     box-shadow:
         0 0 18px rgba(56,189,248,0.36),
         0 0 34px rgba(247,217,130,0.24),
         inset 0 0 12px rgba(0,0,0,0.72);
-
     transform: translateY(-2px) scale(1.02);
 }
 
+/* Click feedback — simulates button press */	
 button:active {
     transform: scale(0.96);
 }
 
+/* Answer container — controls layout of choices */	
 .answers {
     display: flex;
     flex-direction: column;
@@ -494,6 +503,7 @@ button:active {
     width: 100%;
 }
 
+/* Individual answer buttons — flexible sizing */	
 .answers button {
     flex: 1 1 100%;
     min-height: 60px;
@@ -501,61 +511,52 @@ button:active {
     padding: 15px;
     font-size: 18px;
     margin: 0;
-
     background: linear-gradient(180deg,
         rgba(11,34,56,0.96),
         rgba(2,8,18,0.98));
-
     color: #eef6ff;
     border: 1px solid rgba(56,189,248,0.30);
-
     box-shadow:
         0 0 10px rgba(56,189,248,0.18),
         0 0 18px rgba(247,217,130,0.10),
         inset 0 0 14px rgba(0,0,0,0.78);
 }
 
+/* Answer hover — a little brighter than base */	
 .answers button:hover {
     background: linear-gradient(180deg,
         rgba(19,57,86,0.98),
         rgba(8,24,42,0.98));
-
     border-color: rgba(247,217,130,0.66);
-
     box-shadow:
         0 0 18px rgba(56,189,248,0.34),
         0 0 34px rgba(247,217,130,0.22),
         inset 0 0 14px rgba(0,0,0,0.74);
 }
 
+/* Utility button (fullscreen toggle) — safe to restyle or move */	
 .fullscreenBtn {
     position: absolute;
     top: 12px;
     left: 12px;
-
     padding: 6px 12px;
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
-
     color: #e0f2fe;
     background: linear-gradient(180deg, #12304f, #04101f);
-
     border: 1px solid rgba(56,189,248,0.32);
     border-radius: 6px;
     cursor: pointer;
-
     box-shadow:
         0 0 10px rgba(56,189,248,0.22),
         inset 0 0 7px rgba(0,0,0,0.80);
-
     transition: all 0.15s ease;
 }
 
 .fullscreenBtn:hover {
     background: linear-gradient(180deg, #1d4d73, #0b2238);
     border-color: rgba(247,217,130,0.62);
-
     box-shadow:
         0 0 16px rgba(56,189,248,0.34),
         inset 0 0 8px rgba(0,0,0,0.76);
@@ -572,23 +573,18 @@ button:active {
     position: absolute;
     top: 12px;
     right: 12px;
-
     padding: 6px 12px;
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
-
     color: #e0f2fe;
     background: linear-gradient(180deg, #12304f, #04101f);
-
     border: 1px solid rgba(56,189,248,0.32);
     border-radius: 6px;
     cursor: pointer;
-
     box-shadow:
         0 0 10px rgba(56,189,248,0.22),
         inset 0 0 7px rgba(0,0,0,0.80);
-
     transition: all 0.15s ease;
 }
 
@@ -596,7 +592,6 @@ button:active {
     color: #f7d982;
     background: linear-gradient(180deg, #1d4d73, #0b2238);
     border-color: rgba(247,217,130,0.62);
-
     box-shadow:
         0 0 16px rgba(56,189,248,0.34),
         inset 0 0 8px rgba(0,0,0,0.76);
@@ -610,30 +605,24 @@ button:active {
     background: linear-gradient(180deg, #1d4d73, #04101f);
     color: #f7d982;
     font-weight: bold;
-
     padding: 14px 40px;
     font-size: 18px;
     border-radius: 8px;
-
     border: 1px solid rgba(247,217,130,0.56);
     cursor: pointer;
-
     box-shadow:
         0 0 16px rgba(56,189,248,0.32),
         0 0 34px rgba(247,217,130,0.22),
         inset 0 0 12px rgba(0,0,0,0.76);
-
     transition: all 0.15s ease;
 }
 
 .continue-btn:hover {
     background: linear-gradient(180deg, #24628f, #0b2238);
-
     box-shadow:
         0 0 24px rgba(56,189,248,0.46),
         0 0 42px rgba(247,217,130,0.28),
         inset 0 0 12px rgba(0,0,0,0.74);
-
     transform: scale(1.03);
 }
 
@@ -648,41 +637,37 @@ button:active {
    5. PROGRESS & MAZE TRACK
 ========================================= */
     
-#progressBar {
+/* Progress bar container — background track */
+	#progressBar {
     width: 100%;
     height: 22px;
-
     background: linear-gradient(180deg,
         rgba(3,10,24,0.96),
         rgba(2,6,23,0.98));
-
     border-radius: 12px;
     margin-bottom: 20px;
     overflow: hidden;
-
     border: 1px solid rgba(56,189,248,0.26);
-
     box-shadow:
         inset 0 0 12px rgba(0,0,0,0.86),
         0 0 10px rgba(56,189,248,0.18);
 }
-    
+
+/* Progress fill — width controlled by JS */	
 #progressFill {
     height: 100%;
     width: 0%;
-
     background: linear-gradient(90deg,
         #0b2238,
         #38bdf8,
         #f7d982);
-
     box-shadow:
         0 0 12px rgba(56,189,248,0.44),
         0 0 22px rgba(247,217,130,0.28);
-
     transition: width 0.4s ease;
 }
 
+/* Maze grid layout — 10 columns = 30 total rooms */	
 #mazeTrack {
     display: grid;
     grid-template-columns: repeat(10, 36px);
@@ -690,61 +675,53 @@ button:active {
     gap: 10px;
     margin: 25px auto;
 }
-    
+
+/* Individual room cell — default state */	
 .maze-box {
     width: 36px;
     height: 36px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-size: 20px;
     border-radius: 6px;
-
     background: linear-gradient(180deg,
         rgba(11,34,56,0.72),
         rgba(2,6,23,0.94));
-
     border: 1px solid rgba(56,189,248,0.20);
-
     box-shadow:
         inset 0 0 10px rgba(0,0,0,0.80),
         0 0 5px rgba(56,189,248,0.12);
-
     transition: all 0.3s ease;
 }
 
+/* Current room highlight — animated pulse */	
 .maze-box.active {
     background: radial-gradient(circle,
         rgba(56,189,248,0.46),
         rgba(11,34,56,0.58),
         rgba(2,6,23,0.98));
-
     border: 2px solid #f7d982;
-
     box-shadow:
         0 0 12px rgba(56,189,248,0.72),
         0 0 24px rgba(247,217,130,0.36),
         inset 0 0 12px rgba(0,0,0,0.72);
-
     z-index: 10;
     animation: activePulse 1s infinite alternate;
 }
 
+/* Completed tile */	
 .maze-box.completed {
     background: linear-gradient(180deg,
         rgba(19,57,86,0.72),
         rgba(3,10,24,0.96));
-
     border-color: rgba(247,217,130,0.36);
-
     box-shadow:
         0 0 8px rgba(56,189,248,0.26),
         inset 0 0 10px rgba(0,0,0,0.76);
 }
 
-/* Boss room highlights: 10, 20, 30 */
+/* Boss room highlights (10, 20, 30) — visual only */
 .maze-box:nth-child(10) {
     text-shadow:
         0 0 8px #38bdf8,
@@ -782,16 +759,13 @@ button:active {
     height:22px;
     object-fit:contain;
     border-radius:50%;
-
     filter:
         drop-shadow(0 0 8px rgba(247,217,130,0.72))
         drop-shadow(0 0 15px rgba(56,189,248,0.36));
-
     background: radial-gradient(circle,
         rgba(247,217,130,0.36) 0%,
         rgba(56,189,248,0.24) 42%,
         transparent 72%);
-
     animation: pulseControl 2.2s ease-in-out infinite;
 }
 	
@@ -802,21 +776,17 @@ button:active {
 #artifactDrop {
     margin-top: 20px;
     padding: 14px;
-
     background: radial-gradient(circle at center,
         rgba(56,189,248,0.18),
         rgba(15,42,64,0.70) 42%,
         rgba(4,14,28,0.94) 68%,
         rgba(2,6,23,0.99));
-
     border-radius: 12px;
     border: 1px solid rgba(247,217,130,0.38);
-
     box-shadow:
         0 0 22px rgba(56,189,248,0.24),
         0 0 44px rgba(247,217,130,0.16),
         inset 0 0 30px rgba(0,0,0,0.78);
-
     text-align: center;
 }
     
@@ -837,20 +807,16 @@ button:active {
     width: 220px;
     padding: 18px;
     border-radius: 12px;
-
     background: radial-gradient(circle at top,
         rgba(56,189,248,0.16),
         rgba(15,42,64,0.70) 44%,
         rgba(4,14,28,0.94) 70%,
         rgba(2,6,23,0.99));
-
     border: 1px solid rgba(56,189,248,0.26);
-
     box-shadow:
         0 0 20px rgba(56,189,248,0.20),
         0 0 38px rgba(247,217,130,0.12),
         inset 0 0 30px rgba(0,0,0,0.78);
-
     text-align: center;
 }
 
@@ -875,23 +841,19 @@ button:active {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     min-width: 70px;
     text-align:center;
     opacity: .28;
-
     transition: all .4s ease;
 }
 
 .artifactSlot img {
     width: 45px;
     margin-bottom:4px;
-
     filter:
         brightness(0.30)
         contrast(0.92)
         saturate(0.78);
-
     transition: all .4s ease;
 }
 
@@ -913,7 +875,6 @@ button:active {
         drop-shadow(0 0 14px rgba(247,217,130,0.76))
         drop-shadow(0 0 26px rgba(56,189,248,0.44))
         drop-shadow(0 0 34px rgba(15,42,64,0.62));
-
     animation: relicPulse 2.5s ease-in-out infinite;
     backface-visibility: hidden;
     transform: translateZ(0);
