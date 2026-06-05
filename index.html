@@ -772,7 +772,8 @@ button:active {
 /* =========================================
    6. ARTIFACT SYSTEM (REWARDS) — THE MARKET GATE
 ========================================= */
-    
+
+/* Reward popup — appears after boss victory */
 #artifactDrop {
     margin-top: 20px;
     padding: 14px;
@@ -789,7 +790,8 @@ button:active {
         inset 0 0 30px rgba(0,0,0,0.78);
     text-align: center;
 }
-    
+
+/* Artifact image in popup */	
 #artifactImage {
     width: 96px;
     margin-bottom: 8px;
@@ -802,6 +804,7 @@ button:active {
         drop-shadow(0 0 34px rgba(0,0,0,0.64));
 }
 
+/* Persistent artifact collection display (top panel) */	
 #artifactVault {
     margin-top: -6px;
     width: 220px;
@@ -828,6 +831,7 @@ button:active {
         0 2px 6px rgba(0,0,0,0.88);
 }
 
+/* Layout container for artifact slots */	
 .vaultRow {
     display: flex;
     justify-content: center;
@@ -836,6 +840,7 @@ button:active {
     flex-wrap:wrap;
 }
 
+/* Individual artifact slot (default = locked state) */    	
 .artifactSlot {
     display: flex;
     flex-direction: column;
@@ -847,6 +852,7 @@ button:active {
     transition: all .4s ease;
 }
 
+/* Locked artifact image (dimmed effect) */    	
 .artifactSlot img {
     width: 45px;
     margin-bottom:4px;
@@ -857,6 +863,7 @@ button:active {
     transition: all .4s ease;
 }
 
+/* Artifact label text */	
 .artifactSlot span {
     display: block;
     font-size: 13px;
@@ -865,6 +872,7 @@ button:active {
     line-height: 1.2;
 }
 
+/* Glow + animation for unlocked artifacts */	
 .artifactSlot.unlocked {
     opacity: 1;
     transform: scale(1.05);
@@ -892,11 +900,13 @@ button:active {
 /* =========================================
    7. BOSS EFFECTS & ATMOSPHERE — THE MARKET GATE
 ========================================= */
-    
+
+/* Hit animation — triggered when boss takes damage */	
 .boss-shake {
     animation: bossShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+/* Boss image display — includes floating animation */
 .bossIcon {
     width: 96px;
     height: auto;
@@ -934,6 +944,7 @@ button:active {
         drop-shadow(0 0 52px rgba(0,0,0,0.88));
 }
 
+/* Ambient torch effect — decorative, shown during gameplay */	
 .torch {
     position: absolute;
     width: 70px;
@@ -942,14 +953,13 @@ button:active {
     animation: torchFlicker 3s infinite alternate;
     pointer-events: none;
     opacity: .9;
-
     filter:
         drop-shadow(0 0 12px rgba(56,189,248,0.44))
         drop-shadow(0 0 24px rgba(247,217,130,0.24));
-
     display:none;
 }
 
+/* Torch positioning (left/right sides of screen) */	
 .left-torch {
     left: 18px;
 }
@@ -963,92 +973,79 @@ button:active {
    8. FULLSCREEN SCREENS & TRANSITIONS — THE MARKET GATE
 ========================================= */
 
+/* Fullscreen start screen — shown before game begins */    	
 #startScreen{
   position: fixed;
   inset: 0;
-
   background-image:
     linear-gradient(
         rgba(2,6,23,0.18),
         rgba(2,6,23,0.58)
     ),
     url('start screen image.png');
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   z-index: 100;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0px 20px;
   box-sizing: border-box;
 }
 
+/* Transition overlay — appears between rooms (controlled by JS) */	
 #hallwayTransition {
   position: fixed;
   top: 0;
   left: 0;
-
   width: 100%;
   height: 100%;
-
   background:
     linear-gradient(
         rgba(2,6,23,0.54),
         rgba(2,6,23,0.78)
     ),
     url('hallway1.png');
-
   background-size: cover;
   background-position: center;
-
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-
   color: #f7d982;
   font-size: 26px;
-
   z-index: 200;
   opacity: 0;
   pointer-events: none;
-
   transition: opacity 1.2s ease;
   animation: hallwayZoom 3.2s ease-out forwards;
 }
 
+/* Activates transition visibility (DO NOT REMOVE) */    	
 #hallwayTransition.active {
   opacity: 1;
 }
 
+/* Text container for transition messages */	
 #hallwayText {
   max-width: 600px;
-
   background: radial-gradient(circle at center,
       rgba(56,189,248,0.18),
       rgba(15,42,64,0.84) 54%,
       rgba(2,6,23,0.98));
-
   padding: 30px;
   border-radius: 12px;
-
   border: 1px solid rgba(247,217,130,0.34);
-
   box-shadow:
       0 0 24px rgba(0,0,0,0.84),
       0 0 30px rgba(56,189,248,0.20),
       0 0 44px rgba(247,217,130,0.13),
       inset 0 0 28px rgba(0,0,0,0.76);
-
   color: #f9e7ad;
-
   text-shadow:
       0 0 8px rgba(247,217,130,0.26),
       0 0 16px rgba(56,189,248,0.18),
@@ -1071,21 +1068,17 @@ button:active {
   width:min(520px, 100%);
   padding:28px;
   border-radius:18px;
-
   background:
     radial-gradient(circle at top,
       rgba(56,189,248,0.16),
       rgba(11,34,56,0.88) 48%,
       rgba(2,6,23,0.98));
-
   border:1px solid rgba(247,217,130,0.42);
-
   box-shadow:
     0 0 34px rgba(0,0,0,0.88),
     0 0 38px rgba(56,189,248,0.24),
     0 0 46px rgba(247,217,130,0.14),
     inset 0 0 30px rgba(0,0,0,0.72);
-
   text-align:center;
 }
 
@@ -1125,15 +1118,12 @@ button:active {
   0%, 100% {
     filter: brightness(1);
   }
-
   25% {
     filter: brightness(1.04) saturate(1.04);
   }
-
   50% {
     filter: brightness(0.97) saturate(0.99);
   }
-
   75% {
     filter: brightness(1.03) saturate(1.03);
   }
@@ -1165,7 +1155,6 @@ button:active {
       0 0 16px rgba(247,217,130,0.22),
       inset 0 0 10px rgba(0,0,0,0.66);
   }
-
   45% {
     transform: scale(1.13);
     box-shadow:
@@ -1174,7 +1163,6 @@ button:active {
       0 0 42px rgba(15,42,64,0.68),
       inset 0 0 12px rgba(0,0,0,0.70);
   }
-
   70% {
     transform: scale(1.09);
     box-shadow:
@@ -1183,7 +1171,6 @@ button:active {
       0 0 30px rgba(15,42,64,0.60),
       inset 0 0 11px rgba(0,0,0,0.70);
   }
-
   100% {
     transform: scale(1.11);
     box-shadow:
@@ -1203,7 +1190,6 @@ button:active {
       0 0 18px rgba(56,189,248,0.24),
       0 2px 6px rgba(0,0,0,0.92);
   }
-
   50% {
     transform: scale(1.08);
     text-shadow:
@@ -1238,7 +1224,6 @@ button:active {
     opacity: 0;
     transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1254,7 +1239,6 @@ button:active {
       drop-shadow(0 0 18px rgba(56,189,248,0.30))
       drop-shadow(0 0 24px rgba(0,0,0,0.62));
   }
-
   50% {
     transform: scale(1.1);
     filter:
@@ -1270,7 +1254,6 @@ button:active {
     transform: scale(1);
     opacity: 0.9;
   }
-
   50% {
     transform: scale(1.08);
     opacity: 1;
@@ -1292,7 +1275,8 @@ button:active {
     max-width:700px;
     margin:0 auto 10px auto;
 }
-   
+
+/* TITLE ABOVE MAZE */	
 .top-title{
     font-size:22px;
     font-weight:bold;
@@ -1317,6 +1301,8 @@ button:active {
     padding:10px 14px;
 }
 
+/* Main Game Row */
+/* Main horizontal layout: wizard + game area */	
 .main-panel{
     display:flex;
     gap:20px;
@@ -1325,25 +1311,23 @@ button:active {
     align-items: stretch;
 }
    
+/* Game Shell Wrapper*/
+/* Core game container — controls overall layout and spacing */
 #gameShell{
     display:flex;
     gap:20px;
     max-width:900px;
     width:100%;
     margin:0 auto;
-
     background: linear-gradient(
         180deg,
         rgba(11,34,56,0.88),
         rgba(4,14,28,0.96) 48%,
         rgba(2,6,23,0.99)
     );
-
     padding:20px;
     border-radius:16px;
-
     border:1px solid rgba(56,189,248,0.26);
-
     box-shadow:
        0 0 30px rgba(0,0,0,0.90),
        0 0 58px rgba(56,189,248,0.18),
@@ -1351,35 +1335,33 @@ button:active {
        inset 0 0 42px rgba(0,0,0,0.78);
 }
    
+/* Wizard Box */
+/* Chancellor display panel — fixed width, do not remove flex settings */
 #wizardBox{
     width:160px;
     min-width:160px;
     min-height:200px;
-
     background: linear-gradient(
         180deg,
         rgba(19,57,86,0.66),
         rgba(11,34,56,0.88) 52%,
         rgba(2,6,23,0.98)
     );
-
     border-radius:12px;
     padding:10px;
-
     display:flex;
     flex-direction: column;
     justify-content:center;
     align-items:center;    
     gap:6px;
-
     border:1px solid rgba(247,217,130,0.26);
-
     box-shadow:
         inset 0 0 26px rgba(0,0,0,0.78),
         0 0 18px rgba(56,189,248,0.16),
         0 0 30px rgba(247,217,130,0.08);
 }
 
+/* Wizard Name */
 #wizardName {
     font-size: 12px;
     letter-spacing: 1px;
@@ -1390,15 +1372,15 @@ button:active {
     opacity: 0.96;
     text-align: center;
     font-weight: 600;
-
     border-bottom: 1px solid rgba(215,179,90,0.35);
     padding-bottom: 2px;
-
     text-shadow:
         0 0 6px rgba(56,189,248,0.45),
         0 0 10px rgba(215,179,90,0.35);
 }
 
+/* Wizard Image */
+/*Market Advisor visual + floating animation */	
 #wizardImage{
     width:100%;
     max-width:180px;
@@ -1408,21 +1390,22 @@ button:active {
     animation: wizardFloat 4s ease-in-out infinite;
 }
     
+
 /* =========================================
    11. BOSS MODE (UI STATE OVERRIDES) — THE MARKET GATE
 ========================================= */
 
+/* Center layout when wizard is removed */
 .boss-mode #wizardBox{
     display:none;
 }
 
+/* Center and slightly constrain game area for boss mode */	
 .boss-mode #gameBox{
     max-width:900px;
     width:90%;
     margin:0 auto;
-
     border-color: rgba(247,217,130,0.74);
-
     box-shadow:
         0 0 34px rgba(56,189,248,0.36),
         0 0 72px rgba(247,217,130,0.20),
@@ -1437,12 +1420,11 @@ button:active {
     display:block;
     margin:10px auto;
 }
-   
+
+/* Center layout when wizard is removed */
 .boss-mode #gameShell{
     justify-content:center;
-
     border-color: rgba(56,189,248,0.36);
-
     box-shadow:
        0 0 36px rgba(0,0,0,0.92),
        0 0 64px rgba(56,189,248,0.24),
@@ -1451,7 +1433,45 @@ button:active {
 }
 
 /* =========================================
-   12. MOBILE RESPONSIVE SYSTEM — THE MARKET GATE
+   12. MOBILE RESPONSIVE SYSTEM — SAFE TO EDIT (WITH LIMITS)
+=========================================
+
+This section controls how the game behaves on phones.
+
+GOAL:
+- Fit gameplay into a single screen as much as possible
+- Reduce vertical scrolling
+- Keep buttons thumb-friendly
+
+-----------------------------------------
+SAFE TO EDIT:
+- font sizes (clamp values)
+- spacing (gap, padding, margin)
+- grid layout (answers: 1fr 1fr vs 1fr)
+- wizard size (make smaller/larger)
+
+-----------------------------------------
+USE CAUTION:
+- removing elements entirely (may break flow)
+- changing flex direction randomly
+- making buttons too small (hurts usability)
+
+-----------------------------------------
+DO NOT MODIFY:
+- IDs (#gameShell, #gameBox, #wizardBox)
+- core layout structure
+
+-----------------------------------------
+COMMON CUSTOM CHANGES:
+- Want bigger buttons? Increase min-height
+- Want less scrolling? Reduce padding/gaps
+- Want simpler UI? Hide artifact labels
+
+-----------------------------------------
+TIP:
+Mobile design is about SPACE, not style.
+Every pixel matters.
+
 ========================================= */
 
 @media (max-width: 768px){
@@ -1485,6 +1505,7 @@ button:active {
     max-width: 100%;
     padding: 2px 4px;
     margin: 0 auto;
+    box-sizing: border-box;
   }
 
   #mazeTrack{
@@ -1511,6 +1532,7 @@ button:active {
     width: 100%;
     max-width: 100%;
     padding: 4px 6px;
+    box-sizing: border-box;
   }
 
   #artifactVault h3{
@@ -1556,9 +1578,8 @@ button:active {
     padding: 6px;
     gap: 6px;
     margin: 0 auto;
-
+    box-sizing: border-box;
     border-color: rgba(56,189,248,0.22);
-
     box-shadow:
        0 0 24px rgba(0,0,0,0.90),
        0 0 38px rgba(56,189,248,0.14),
@@ -1574,6 +1595,7 @@ button:active {
     padding-top: 6px;
     gap: 2px;
     margin: 0 auto;
+    box-sizing: border-box;
   }
 
   #wizardName{
@@ -1596,6 +1618,7 @@ button:active {
     width: 100%;
     padding: 8px;
     margin: 0 auto;
+    box-sizing: border-box;
   }
 
   #autosave{
@@ -1662,16 +1685,16 @@ button:active {
   }
 
   .sound-toggle{
-    right:14px;
-    bottom:14px;
-    padding:8px 10px;
-    font-size:10px;
+    right: 14px;
+    bottom: 14px;
+    padding: 8px 10px;
+    font-size: 10px;
   }
 }
 
-
 /* =========================================
    13. MODE SELECT + TIMED TRIAL HUD
+	   Market Gate version
 ========================================= */
 
 .mode-select-screen{
@@ -1832,7 +1855,8 @@ button:active {
 }
 
 @keyframes timerWarningPulse{
-  from{ transform: scale(1); }
+  from{ 
+	  transform: scale(1); }
   to{
     transform: scale(1.08);
     text-shadow:
@@ -1851,14 +1875,13 @@ button:active {
     align-items:flex-start;
     overflow-y:auto;
   }
-
   .mode-grid{ grid-template-columns:1fr; }
   .mode-card{ min-height:250px; }
   .mode-card img{ height:145px; }
 }
 
 /* =========================================
-   13. SOUND ON/OFF — THE MARKET GATE
+   14. SOUND ON/OFF — THE MARKET GATE
 ========================================= */
 
 .sound-toggle{
@@ -1866,32 +1889,24 @@ button:active {
   right:28px;
   bottom:24px;
   z-index:999;
-
   padding:10px 13px;
   border-radius:999px;
-
   border:1px solid rgba(56,189,248,0.30);
-
   background: linear-gradient(
       180deg,
       rgba(11,34,56,0.72),
       rgba(2,6,23,0.82)
   );
-
   color:rgba(224,242,254,0.78);
-
   cursor:pointer;
   font-size:11px;
   letter-spacing:.12em;
   text-transform:uppercase;
-
   box-shadow:
       0 0 18px rgba(0,0,0,.48),
       0 0 18px rgba(56,189,248,0.14),
       inset 0 0 10px rgba(0,0,0,0.72);
-
   backdrop-filter: blur(3px);
-
   transition:
       color .18s ease,
       border-color .18s ease,
@@ -1903,19 +1918,16 @@ button:active {
 .sound-toggle:hover{
   color:#f7d982;
   border-color:rgba(247,217,130,0.56);
-
   background: linear-gradient(
       180deg,
       rgba(19,57,86,0.84),
       rgba(4,14,28,0.90)
   );
-
   box-shadow:
       0 0 22px rgba(0,0,0,.52),
       0 0 20px rgba(56,189,248,0.22),
       0 0 26px rgba(247,217,130,0.14),
       inset 0 0 10px rgba(0,0,0,0.74);
-
   transform: translateY(-1px);
 }
  
