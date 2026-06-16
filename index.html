@@ -2704,7 +2704,13 @@ const SCORE_ATTACK_CONFIG = {
         { minStreak: 5, points: 50, label: "Streak" },
         { minStreak: 3, points: 20, label: "Streak" },
         { minStreak: 2, points: 10, label: "Streak" }
-    ]
+    ],
+
+    // SCORE ATTACK MODE ADDITION:
+    // Short pause after points appear but before normal feedback/progression continues.
+    // Correct answers get a little more time because they can stack Correct + Speed + Streak.
+    resolveDelayCorrectMs: 725,
+    resolveDelayWrongMs: 625
 };
 
 let scoreAttackScore = 0;
@@ -2926,6 +2932,27 @@ function applyScoreAttackRapidGuessPenalty(){
     if(!modeUsesScoreAttack()) return;
 
     applyScoreAttackEvent("Rapid Guess", SCORE_ATTACK_CONFIG.rapidMissPenalty);
+}
+
+// SCORE ATTACK MODE ADDITION:
+// This creates the tiny arcade-style "score resolve" beat.
+// It lets +100 / Speed / Streak / Wrong penalties breathe before feedback appears.
+function getScoreAttackResolveDelay(isCorrect){
+    if(!modeUsesScoreAttack()) return 0;
+
+    return isCorrect
+        ? SCORE_ATTACK_CONFIG.resolveDelayCorrectMs
+        : SCORE_ATTACK_CONFIG.resolveDelayWrongMs;
+}
+
+function waitForScoreAttackResolve(isCorrect){
+    const delay = getScoreAttackResolveDelay(isCorrect);
+
+    if(!delay || delay <= 0){
+        return Promise.resolve();
+    }
+
+    return new Promise(resolve => setTimeout(resolve, delay));
 }
 
 function updateScoreAttackHud(){
@@ -6605,7 +6632,7 @@ function checkRapidGuessing(isCorrect, responseTime){
 //
 // Check for artifact names and CHANGE
      
-function answer(choice) {
+async function answer(choice) {
     // --- GLOBAL MEMORY DECAY ---
     for(let tag in conceptMemory){
     conceptMemory[tag] *= 0.95;
@@ -6726,6 +6753,15 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         score: scoreAttackScore,
         bestScore: scoreAttackBestScore
     });
+
+    // SCORE ATTACK MODE ADDITION:
+    // Pause only in Score Attack so the player can actually read the score result
+    // before the normal feedback, boss hit, hallway transition, or wrong-turn modal fires.
+    // The buttons stay disabled during the beat so double taps do not create duplicate answers.
+    if(modeUsesScoreAttack()){
+        setAnswerButtonsDisabled(true);
+        await waitForScoreAttackResolve(isCorrect);
+    }
 
     // =============================================
     // ✅ CORRECT ANSWER LOGIC
