@@ -2181,6 +2181,181 @@ body.game-active #soundToggle {
     transform: none !important;
 }
 		
+
+/* =========================================
+   15. POST-BATTLE MASTERY REPORT
+   Student-facing diagnostic after a completed run.
+========================================= */
+.mastery-report-screen{
+    text-align:left;
+    padding:24px;
+    color:#eef6ff;
+}
+
+.mastery-report-title{
+    text-align:center;
+    color:#f7d982;
+    font-size:32px;
+    letter-spacing:2px;
+    margin:0 0 8px 0;
+    text-shadow:
+        0 0 16px rgba(247,217,130,0.70),
+        0 0 30px rgba(56,189,248,0.28),
+        0 3px 8px rgba(0,0,0,0.92);
+}
+
+.mastery-report-subtitle{
+    text-align:center;
+    color:#c7ecff;
+    font-style:italic;
+    margin:0 auto 18px auto;
+    max-width:680px;
+    line-height:1.45;
+}
+
+.mastery-summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(145px, 1fr));
+    gap:10px;
+    margin:18px 0;
+}
+
+.mastery-stat-card,
+.mastery-section{
+    background:
+        radial-gradient(circle at top,
+            rgba(56,189,248,0.14),
+            rgba(11,34,56,0.82) 45%,
+            rgba(2,6,23,0.96));
+    border:1px solid rgba(247,217,130,0.28);
+    border-radius:12px;
+    box-shadow:
+        0 0 18px rgba(0,0,0,0.62),
+        inset 0 0 20px rgba(0,0,0,0.52);
+}
+
+.mastery-stat-card{
+    padding:12px;
+    text-align:center;
+}
+
+.mastery-stat-label{
+    display:block;
+    color:#c7ecff;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:6px;
+}
+
+.mastery-stat-value{
+    display:block;
+    color:#f7d982;
+    font-size:24px;
+    font-weight:900;
+    text-shadow:0 0 10px rgba(247,217,130,0.40);
+}
+
+.mastery-section{
+    padding:16px;
+    margin:14px 0;
+}
+
+.mastery-section h3{
+    margin:0 0 12px 0;
+    color:#f7d982;
+    letter-spacing:1px;
+    text-shadow:0 0 10px rgba(247,217,130,0.34);
+}
+
+.mastery-verdict{
+    border-left:3px solid #f7d982;
+    padding:14px 16px;
+    margin:14px 0;
+    background:rgba(2,6,23,0.54);
+    border-radius:10px;
+    color:#e0f2fe;
+    line-height:1.5;
+}
+
+.mastery-row{
+    padding:10px 0;
+    border-top:1px solid rgba(224,242,254,0.12);
+}
+
+.mastery-row:first-child{
+    border-top:none;
+}
+
+.mastery-row-main{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:flex-start;
+}
+
+.mastery-row-name{
+    color:#eef6ff;
+    font-weight:700;
+    line-height:1.25;
+}
+
+.mastery-row-score{
+    color:#f7d982;
+    white-space:nowrap;
+    font-weight:800;
+}
+
+.mastery-row-meta{
+    display:block;
+    margin-top:5px;
+    color:rgba(199,236,255,0.72);
+    font-size:12px;
+    line-height:1.35;
+}
+
+.mastery-bar{
+    height:8px;
+    margin-top:8px;
+    border-radius:999px;
+    background:rgba(2,6,23,0.82);
+    overflow:hidden;
+    border:1px solid rgba(56,189,248,0.18);
+}
+
+.mastery-bar-fill{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background:linear-gradient(90deg, #b91c1c, #38bdf8, #f7d982);
+    box-shadow:0 0 10px rgba(56,189,248,0.38);
+}
+
+.mastery-empty{
+    color:rgba(224,242,254,0.74);
+    font-style:italic;
+    margin:0;
+}
+
+.mastery-actions{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.mastery-actions button{
+    min-width:150px;
+}
+
+@media(max-width:768px){
+    .mastery-report-screen{ padding:14px; }
+    .mastery-report-title{ font-size:24px; }
+    .mastery-row-main{ flex-direction:column; gap:4px; }
+    .mastery-row-score{ white-space:normal; }
+}
+
 </style>
 </head>
 
@@ -2760,7 +2935,7 @@ function setMissionArtifactCount(count){
 }
 
 function updateMissionArtifactCountFromVault(){
-    const artifactCount = ["vaultCompass", "vaultLens", "vaultScale"]
+    const artifactCount = ["vaultCompass", "vaultLens", "vaultScales"]
         .filter(key => localStorage.getItem(key) === "true").length;
 
     setMissionArtifactCount(artifactCount);
@@ -4866,6 +5041,7 @@ function endTimedModeRun(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
     `;
@@ -7436,6 +7612,7 @@ function handleLegendaryVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
     `;
 
@@ -7513,6 +7690,7 @@ function handleScoreAttackVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartScoreAttackMode()">Retry Score Attack</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
     `;
@@ -7575,6 +7753,7 @@ function handlePracticeModeComplete(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
     `;
 
@@ -7777,9 +7956,12 @@ else if(accuracy < 75){
             ${archivistLine}
         </p>
 
-        <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
             <button id="shareBtn" onclick="copyResults()" style="background:linear-gradient(180deg,#f0c86a,#9a6b1f); color:#111827; font-weight:bold; padding:12px 24px; border:1px solid rgba(255,255,255,0.25); border-radius:6px; cursor:pointer;">
                 Copy Results
+            </button>
+            <button onclick="showMasteryReportScreen()" style="background:linear-gradient(180deg,#1d4d73,#04101f); color:#f7d982; font-weight:bold; padding:12px 24px; border:1px solid rgba(247,217,130,0.55); border-radius:6px; cursor:pointer;">
+                View Mastery Report
             </button>
             <button onclick="location.reload()" style="background:transparent; color:#e5e7eb; border:1px solid rgba(229,231,235,0.55); padding:12px 24px; border-radius:6px; cursor:pointer;">
                 Play The Gate Again
@@ -7797,6 +7979,450 @@ else if(accuracy < 75){
         }
     }, 600);
 }     
+
+
+
+// =============================================
+// POST-BATTLE MASTERY REPORT
+// Student-facing diagnostic built from masteryState.
+// Uses existing tag, objective, skill, type, accuracy, and response-time data.
+// No answer keys. No question IDs. No nonsense.
+// =============================================
+let latestResultsScreenHTML = "";
+
+const MARKET_GATE_OBJECTIVE_LABELS = {
+    "LO1.1": "LO 1.1 — Tradeoffs and scarcity",
+    "LO1.2": "LO 1.2 — Opportunity cost",
+    "LO1.3": "LO 1.3 — Marginal decision-making",
+    "LO1.4": "LO 1.4 — Incentives and behavior",
+    "LO1.5": "LO 1.5 — Gains from trade",
+    "LO1.6": "LO 1.6 — Markets and allocation",
+    "LO2.1": "LO 2.1 — Economic models and assumptions",
+    "LO2.2": "LO 2.2 — PPF, circular flow, and tradeoffs",
+    "LO2.3": "LO 2.3 — Microeconomics vs. macroeconomics",
+    "LO2.4": "LO 2.4 — Positive vs. normative analysis",
+    "LO2.5": "LO 2.5 — Economists and policy roles",
+    "LO4.1": "LO 4.1 — Competitive markets",
+    "LO4.2": "LO 4.2 — Demand and demand shifts",
+    "LO4.3": "LO 4.3 — Supply and supply shifts",
+    "LO4.4": "LO 4.4 — Market equilibrium and changes",
+    "LO4.5": "LO 4.5 — Prices as signals",
+    "LO6.1": "LO 6.1 — Price ceilings",
+    "LO6.2": "LO 6.2 — Price floors",
+    "LO6.3": "LO 6.3 — Taxes and tax wedges",
+    "LO6.4": "LO 6.4 — Buyer/seller tax equivalence",
+    "LO6.5": "LO 6.5 — Tax incidence and elasticity"
+};
+
+function escapeHTML(value){
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function titleCase(value){
+    return String(value || "")
+        .replace(/_/g, " ")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function formatMasteryLabel(key){
+    if(!key) return "Unlabeled Concept";
+
+    const text = String(key);
+    const objectiveMatch = text.match(/^(LO\d+\.\d+)/);
+
+    if(objectiveMatch && MARKET_GATE_OBJECTIVE_LABELS[objectiveMatch[1]]){
+        const suffix = text
+            .replace(objectiveMatch[1], "")
+            .replace(/^_+/, "")
+            .replace(/_/g, " ")
+            .trim();
+
+        return suffix
+            ? `${MARKET_GATE_OBJECTIVE_LABELS[objectiveMatch[1]]}: ${titleCase(suffix)}`
+            : MARKET_GATE_OBJECTIVE_LABELS[objectiveMatch[1]];
+    }
+
+    return titleCase(text);
+}
+
+function formatPercent(value){
+    if(value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+    return `${Math.round(Number(value) * 100)}%`;
+}
+
+function formatSeconds(ms){
+    const numeric = Number(ms || 0);
+    if(!Number.isFinite(numeric) || numeric <= 0) return "—";
+    return `${Math.round(numeric / 1000)}s`;
+}
+
+function getBucketEntry(key, bucket, category = "concept"){
+    if(!bucket || !bucket.attempts){
+        return null;
+    }
+
+    const attempts = Number(bucket.attempts || 0);
+    const correct = Number(bucket.correct || 0);
+    const accuracy = attempts ? correct / attempts : null;
+    const typeForTiming = category === "type" ? key : "default";
+    const target = getTypeTargetMs(typeForTiming);
+    const avgTime = Number(bucket.avgTime || 0);
+    const timeRatio = avgTime && target ? avgTime / target : 1;
+    const fluency = accuracy === null
+        ? 0
+        : accuracy - clamp((timeRatio - 1) * 0.25, 0, 0.35);
+
+    return {
+        key,
+        label: formatMasteryLabel(key),
+        category,
+        attempts,
+        correct,
+        accuracy,
+        avgTime,
+        timeRatio,
+        fluency
+    };
+}
+
+function getEntriesFromBuckets(source, category = "concept"){
+    return Object.entries(source || {})
+        .map(([key, bucket]) => getBucketEntry(key, bucket, category))
+        .filter(Boolean);
+}
+
+function getTypeMasteryEntries(){
+    const typeBuckets = {};
+
+    Object.values(masteryState.byTag || {}).forEach(tagBucket => {
+        Object.entries(tagBucket.byType || {}).forEach(([type, bucket]) => {
+            if(!typeBuckets[type]){
+                typeBuckets[type] = { attempts: 0, correct: 0, avgTime: 0 };
+            }
+
+            const oldAttempts = typeBuckets[type].attempts;
+            const newAttempts = oldAttempts + Number(bucket.attempts || 0);
+
+            typeBuckets[type].correct += Number(bucket.correct || 0);
+            typeBuckets[type].avgTime = newAttempts
+                ? ((typeBuckets[type].avgTime * oldAttempts) + (Number(bucket.avgTime || 0) * Number(bucket.attempts || 0))) / newAttempts
+                : 0;
+            typeBuckets[type].attempts = newAttempts;
+        });
+    });
+
+    return getEntriesFromBuckets(typeBuckets, "type");
+}
+
+function sortStrongest(entries){
+    return [...entries]
+        .filter(entry => entry.attempts >= 2)
+        .sort((a,b) => (b.accuracy - a.accuracy) || (b.fluency - a.fluency) || (b.attempts - a.attempts));
+}
+
+function sortWeakest(entries){
+    const enoughData = entries.filter(entry => entry.attempts >= 2);
+    const pool = enoughData.length ? enoughData : entries;
+
+    return [...pool]
+        .sort((a,b) => (a.accuracy - b.accuracy) || (a.fluency - b.fluency) || (b.avgTime - a.avgTime));
+}
+
+function renderMasteryRows(entries, emptyText){
+    if(!entries || entries.length === 0){
+        return `<p class="mastery-empty">${escapeHTML(emptyText)}</p>`;
+    }
+
+    return entries.map(entry => {
+        const pct = Math.max(0, Math.min(100, Math.round((entry.accuracy || 0) * 100)));
+        const pace = entry.timeRatio > 1.25
+            ? "Slow response pattern"
+            : entry.timeRatio < 0.65
+                ? "Fast response pattern"
+                : "Stable pace";
+
+        return `
+            <div class="mastery-row">
+                <div class="mastery-row-main">
+                    <span class="mastery-row-name">${escapeHTML(entry.label)}</span>
+                    <span class="mastery-row-score">${formatPercent(entry.accuracy)} · ${entry.correct}/${entry.attempts}</span>
+                </div>
+                <span class="mastery-row-meta">Average response: ${formatSeconds(entry.avgTime)} · ${pace}</span>
+                <div class="mastery-bar"><div class="mastery-bar-fill" style="width:${pct}%"></div></div>
+            </div>
+        `;
+    }).join("");
+}
+
+function getRecentBehaviorSignals(){
+    const recent = masteryState.recent || [];
+    let fastMisses = 0;
+    let slowCorrects = 0;
+    let recentCorrect = 0;
+    let recentTimeTotal = 0;
+
+    recent.forEach(item => {
+        const target = getTypeTargetMs(item.type || "default");
+        const responseTime = Number(item.responseTime || 0);
+
+        if(item.correct) recentCorrect++;
+        if(responseTime) recentTimeTotal += responseTime;
+
+        if(!item.correct && responseTime > 0 && responseTime < target * 0.55){
+            fastMisses++;
+        }
+
+        if(item.correct && responseTime > target * 1.20){
+            slowCorrects++;
+        }
+    });
+
+    return {
+        count: recent.length,
+        accuracy: recent.length ? recentCorrect / recent.length : null,
+        avgTime: recent.length ? recentTimeTotal / recent.length : 0,
+        fastMisses,
+        slowCorrects
+    };
+}
+
+
+function getMasteryReportModeName(){
+    if(gameMode === "timed-complete") return "Timed Trial";
+    if(gameMode === "score") return "Score Attack";
+    if(gameMode === "legendary") return "Legendary Mode";
+    if(gameMode === "exam") return "Exam Drill";
+    return getModeDisplayName();
+}
+
+function getMasteryReportData(){
+    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
+    const tagEntries = getEntriesFromBuckets(masteryState.byTag || {}, "tag");
+    const objectiveEntries = getEntriesFromBuckets(masteryState.byObjective || {}, "objective");
+    const skillEntries = getEntriesFromBuckets(masteryState.bySkill || {}, "skill");
+    const typeEntries = getTypeMasteryEntries();
+    const behavior = getRecentBehaviorSignals();
+
+    const strongest = sortStrongest([...objectiveEntries, ...tagEntries]).slice(0, 4);
+    const weakestObjectives = sortWeakest(objectiveEntries).slice(0, 4);
+    const weakestTypes = sortWeakest(typeEntries).slice(0, 3);
+    const weakestSkills = sortWeakest(skillEntries).slice(0, 3);
+
+    let verdict = "The Custodian found enough signal to build a report. Use it. Ignoring it would be malpractice with extra steps.";
+
+    if(totalAttempts < 5){
+        verdict = "The report is limited because this run has very few attempts. The Gate needs more evidence before it can judge mastery with confidence.";
+    } else if(accuracy >= 0.90){
+        verdict = "Strong command. You cleared the Gate with high accuracy. Your next move is pressure: Score Attack or Legendary Mode.";
+    } else if(accuracy >= 0.75){
+        verdict = "Battle-ready, but not bulletproof. The weak areas below are where points will leak on an exam.";
+    } else {
+        verdict = "Unstable command. You finished, but the Gate exposed weak signals. Hit the listed areas before chasing speed or Legendary Mode.";
+    }
+
+    const nextSteps = [];
+
+    if(weakestObjectives[0]){
+        nextSteps.push(`Review ${weakestObjectives[0].label}. That objective showed the weakest mastery signal.`);
+    }
+
+    if(weakestTypes[0]){
+        nextSteps.push(`Practice ${weakestTypes[0].label} questions. That question form caused the most trouble.`);
+    }
+
+    if(weakestSkills[0]){
+        nextSteps.push(`Drill ${weakestSkills[0].label}. That skill needs cleaner repetition.`);
+    }
+
+    if(behavior.fastMisses >= 2){
+        nextSteps.push("Slow down on traps and graph-style items. Fast misses are not fluency. They are just wrong answers with confidence.");
+    } else if(behavior.slowCorrects >= 3){
+        nextSteps.push("You can get answers right, but some correct responses were slow. Build speed only after the reasoning is automatic.");
+    }
+
+    if(nextSteps.length === 0){
+        nextSteps.push("Run a harder mode next. The current evidence does not show a major weak point. Make the Gate earn its paycheck.");
+    }
+
+    return {
+        mode: getMasteryReportModeName(),
+        accuracy,
+        totalTimeMs,
+        timeString: formatTime(totalTimeMs),
+        totalAttempts,
+        correctAnswers,
+        maxStreak,
+        score: modeUsesScoreAttack() ? scoreAttackScore : null,
+        strongest,
+        weakestObjectives,
+        weakestTypes,
+        weakestSkills,
+        behavior,
+        verdict,
+        nextSteps
+    };
+}
+
+function showMasteryReportScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox) return;
+
+    if(!document.getElementById("masteryReportScreen")){
+        latestResultsScreenHTML = gameBox.innerHTML;
+    }
+
+    const report = getMasteryReportData();
+    const scoreCard = report.score !== null
+        ? `<div class="mastery-stat-card"><span class="mastery-stat-label">Score</span><span class="mastery-stat-value">${report.score}</span></div>`
+        : "";
+
+    gameBox.innerHTML = `
+        <div id="masteryReportScreen" class="mastery-report-screen">
+            <h1 class="mastery-report-title">THE CUSTODIAN'S REPORT</h1>
+            <p class="mastery-report-subtitle">Post-battle mastery readout for The Market Gate. This is the signal behind the score.</p>
+
+            <div class="mastery-summary-grid">
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Mode</span><span class="mastery-stat-value">${escapeHTML(report.mode)}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Accuracy</span><span class="mastery-stat-value">${formatPercent(report.accuracy)}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Correct</span><span class="mastery-stat-value">${report.correctAnswers}/${report.totalAttempts}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Best Streak</span><span class="mastery-stat-value">${report.maxStreak}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Time</span><span class="mastery-stat-value">${escapeHTML(report.timeString)}</span></div>
+                ${scoreCard}
+            </div>
+
+            <div class="mastery-verdict">${escapeHTML(report.verdict)}</div>
+
+            <div class="mastery-section">
+                <h3>Strongest Signals</h3>
+                ${renderMasteryRows(report.strongest, "No clear strength signal yet. The run did not create enough repeated evidence.")}
+            </div>
+
+            <div class="mastery-section">
+                <h3>Weakest Learning Objectives</h3>
+                ${renderMasteryRows(report.weakestObjectives, "No objective weakness was detected. Either the run was clean, or there was not enough data.")}
+            </div>
+
+            <div class="mastery-section">
+                <h3>Weakest Question Forms</h3>
+                ${renderMasteryRows(report.weakestTypes, "No question-type weakness was detected.")}
+            </div>
+
+            <div class="mastery-section">
+                <h3>Weakest Skills</h3>
+                ${renderMasteryRows(report.weakestSkills, "No skill weakness was detected.")}
+            </div>
+
+            <div class="mastery-section">
+                <h3>Behavior Signals</h3>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Recent Accuracy</span>
+                        <span class="mastery-row-score">${formatPercent(report.behavior.accuracy)}</span>
+                    </div>
+                    <span class="mastery-row-meta">Based on the last ${report.behavior.count} tracked attempts.</span>
+                </div>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Fast Misses</span>
+                        <span class="mastery-row-score">${report.behavior.fastMisses}</span>
+                    </div>
+                    <span class="mastery-row-meta">Fast wrong answers suggest careless reading or trap selection.</span>
+                </div>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Slow Corrects</span>
+                        <span class="mastery-row-score">${report.behavior.slowCorrects}</span>
+                    </div>
+                    <span class="mastery-row-meta">Slow correct answers suggest understanding is present but not automatic yet.</span>
+                </div>
+            </div>
+
+            <div class="mastery-section">
+                <h3>Next Moves</h3>
+                ${report.nextSteps.map(step => `<div class="mastery-row"><span class="mastery-row-name">${escapeHTML(step)}</span></div>`).join("")}
+            </div>
+
+            <div class="mastery-actions">
+                <button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
+                <button class="continue-btn secondary-modal-btn" onclick="restoreResultsScreen()">Back to Results</button>
+                <button class="continue-btn secondary-modal-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
+            </div>
+        </div>
+    `;
+}
+
+function restoreResultsScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox || !latestResultsScreenHTML) return;
+
+    gameBox.innerHTML = latestResultsScreenHTML;
+
+    const line = document.getElementById("archivistLine");
+    if(line){
+        line.style.opacity = 1;
+    }
+}
+
+function copyMasteryReport(){
+    const report = getMasteryReportData();
+
+    const lines = [
+        "The Market Gate — Custodian's Mastery Report",
+        `Student: ${username}`,
+        `Mode: ${report.mode}`,
+        `Accuracy: ${formatPercent(report.accuracy)} (${report.correctAnswers}/${report.totalAttempts})`,
+        `Best Streak: ${report.maxStreak}`,
+        `Time: ${report.timeString}`,
+        report.score !== null ? `Score: ${report.score}` : null,
+        "",
+        "Strongest Signals:",
+        ...(report.strongest.length ? report.strongest.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No clear strength signal yet."]),
+        "",
+        "Weakest Learning Objectives:",
+        ...(report.weakestObjectives.length ? report.weakestObjectives.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No objective weakness detected."]),
+        "",
+        "Weakest Question Forms:",
+        ...(report.weakestTypes.length ? report.weakestTypes.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No question-type weakness detected."]),
+        "",
+        "Next Moves:",
+        ...report.nextSteps.map(step => `- ${step}`)
+    ].filter(line => line !== null);
+
+    const text = lines.join("\n");
+
+    function markCopied(){
+        const btn = Array.from(document.querySelectorAll("button"))
+            .find(button => button.innerText === "Copy Report" || button.innerText === "Copied!");
+
+        if(!btn) return;
+        const original = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => { btn.innerText = original; }, 1800);
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(markCopied);
+        return;
+    }
+
+    const temp = document.createElement("textarea");
+    temp.value = text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+    markCopied();
+}
+
 
 // =============================
 // UTILITIES
