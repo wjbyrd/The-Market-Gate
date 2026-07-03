@@ -316,14 +316,90 @@ body::after{
 
 #questionImageBox img{
     max-width: 100%;
-    width: 420px;
+    width: min(100%, 640px);
+    max-height: 42vh;
     height: auto;
+    object-fit: contain;
     border-radius: 10px;
     border: 1px solid rgba(247,217,130,0.26);
     box-shadow:
         0 0 14px rgba(56,189,248,0.22),
         0 0 30px rgba(15,23,42,0.72),
         0 0 28px rgba(0,0,0,0.74);
+    cursor: zoom-in;
+}
+
+#questionImageBox .graph-zoom-note{
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(224,242,254,0.72);
+    font-style: italic;
+}
+
+#graphLightbox{
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 26px;
+    box-sizing: border-box;
+    background: rgba(2,6,23,0.88);
+    backdrop-filter: blur(5px);
+}
+
+#graphLightbox.active{
+    display: flex;
+}
+
+#graphLightbox img{
+    width: min(96vw, 1180px);
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid rgba(247,217,130,0.54);
+    box-shadow:
+        0 0 28px rgba(56,189,248,0.34),
+        0 0 70px rgba(0,0,0,0.86);
+}
+
+#graphLightboxClose{
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    right: 16px;
+    z-index: 5001;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    font-size: 28px;
+    line-height: 38px;
+    color: #fff7d6;
+    background: rgba(3,10,24,0.94);
+    border: 1px solid rgba(247,217,130,0.62);
+    box-shadow:
+        0 0 20px rgba(56,189,248,0.36),
+        inset 0 0 12px rgba(0,0,0,0.78);
+}
+
+@media(max-width:768px){
+    #questionImageBox img{
+        width: min(100%, 520px);
+        max-height: 36vh;
+        object-fit: contain;
+    }
+
+    #graphLightbox{
+        padding: 12px;
+    }
+
+    #graphLightbox img{
+        width: 98vw;
+        max-height: 86vh;
+    }
 }
 
 /* =========================================
@@ -2602,6 +2678,11 @@ DO NOT REMOVE:
       <button id="gameModalCancel" class="continue-btn secondary-modal-btn" style="display:none;">Cancel</button>
     </div>
   </div>
+</div>
+
+<div id="graphLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Expanded question graph">
+  <button id="graphLightboxClose" type="button" aria-label="Close expanded graph">×</button>
+  <img id="graphLightboxImg" alt="Expanded question graph">
 </div>
 
 <!-- =========================================
@@ -5026,6 +5107,7 @@ function endTimedModeRun(){
     document.getElementById("bossMessage").innerText = "";
     document.getElementById("formulaHint").innerText = "";
     document.getElementById("artifactDrop").style.display = "none";
+    closeGraphLightbox();
     document.getElementById("questionImageBox").style.display = "none";
 
     document.getElementById("question").innerHTML = `
@@ -5058,6 +5140,7 @@ function restartTimedMode(){
 function returnToModeSelectFromRun(){
     stopTimedModeClock();
     stopAllMusic();
+    closeGraphLightbox();
 
     setGameControlsVisible(false);
 
@@ -6391,6 +6474,51 @@ function playFinalBossMusic(){
 }
 
 // =============================================
+// QUESTION GRAPH LIGHTBOX
+// Click any question graph to enlarge it. Click the X, backdrop, or Escape to close.
+// =============================================
+function openGraphLightbox(src, altText){
+    const lightbox = document.getElementById("graphLightbox");
+    const lightboxImg = document.getElementById("graphLightboxImg");
+    if(!lightbox || !lightboxImg || !src) return;
+
+    lightboxImg.src = src;
+    lightboxImg.alt = altText || "Expanded question graph";
+    lightbox.classList.add("active");
+    lightbox.setAttribute("aria-hidden", "false");
+}
+
+function closeGraphLightbox(){
+    const lightbox = document.getElementById("graphLightbox");
+    const lightboxImg = document.getElementById("graphLightboxImg");
+    if(!lightbox) return;
+
+    lightbox.classList.remove("active");
+    lightbox.setAttribute("aria-hidden", "true");
+    if(lightboxImg) lightboxImg.removeAttribute("src");
+}
+
+document.addEventListener("click", function(event){
+    const target = event.target;
+    const graphImg = target && target.closest ? target.closest("#questionImageBox img") : null;
+
+    if(graphImg){
+        openGraphLightbox(graphImg.src, graphImg.alt);
+        return;
+    }
+
+    if(target && (target.id === "graphLightbox" || target.id === "graphLightboxClose")){
+        closeGraphLightbox();
+    }
+});
+
+document.addEventListener("keydown", function(event){
+    if(event.key === "Escape"){
+        closeGraphLightbox();
+    }
+});
+
+// =============================================
 // MAIN GAME LOOP — DO NOT MODIFY
 // =============================================
 // Controls:
@@ -6424,6 +6552,7 @@ function loadQuestion() {
     document.getElementById("artifactDrop").style.display = "none";
 
 	imageBox.innerHTML = "";
+	closeGraphLightbox();
 	imageBox.style.display = "none";
 
     // 1. Determine Difficulty and Boss Status
@@ -6526,7 +6655,7 @@ if (isBoss) {
     currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
 
     if (currentQuestion.image) {
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -6597,7 +6726,7 @@ if(gameMode === "legendary"){
     );
 
     if(currentQuestion.image){
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -6669,7 +6798,7 @@ else{
 }
 		
 if(currentQuestion.image){
-    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
     imageBox.style.display = "block";
 }
 
@@ -7598,6 +7727,8 @@ function handleLegendaryVictory(){
     document.getElementById("bossMessage").innerText = "";
     document.getElementById("formulaHint").innerText = "";
     document.getElementById("artifactDrop").style.display = "none";
+    closeGraphLightbox();
+    document.getElementById("questionImageBox").style.display = "none";
 
     document.getElementById("question").innerHTML = `
         <span class="boss-title">LEGENDARY MODE COMPLETE</span>
@@ -7674,6 +7805,7 @@ function handleScoreAttackVictory(){
     document.getElementById("bossMessage").innerText = "";
     document.getElementById("formulaHint").innerText = "";
     document.getElementById("artifactDrop").style.display = "none";
+    closeGraphLightbox();
     document.getElementById("questionImageBox").style.display = "none";
 
     document.getElementById("question").innerHTML = `
@@ -7741,6 +7873,8 @@ function handlePracticeModeComplete(){
     document.getElementById("bossMessage").innerText = "";
     document.getElementById("formulaHint").innerText = "";
     document.getElementById("artifactDrop").style.display = "none";
+    closeGraphLightbox();
+    document.getElementById("questionImageBox").style.display = "none";
 
     document.getElementById("question").innerHTML = `
         <span class="boss-title">${getModeDisplayName().toUpperCase()} COMPLETE</span>
@@ -8036,13 +8170,19 @@ function formatMasteryLabel(key){
     if(!key) return "Unlabeled Concept";
 
     const text = String(key);
+    const exactLabel = MARKET_GATE_OBJECTIVE_LABELS[text];
+
+    if(exactLabel){
+        return exactLabel;
+    }
+
     const objectiveMatch = text.match(/^(LO\d+\.\d+)/);
 
     if(objectiveMatch && MARKET_GATE_OBJECTIVE_LABELS[objectiveMatch[1]]){
         const suffix = text
             .replace(objectiveMatch[1], "")
             .replace(/^_+/, "")
-            .replace(/_/g, " ")
+            .replace(/^-+/, "")
             .trim();
 
         return suffix
@@ -8134,6 +8274,18 @@ function sortWeakest(entries){
 
     return [...pool]
         .sort((a,b) => (a.accuracy - b.accuracy) || (a.fluency - b.fluency) || (b.avgTime - a.avgTime));
+}
+
+function getMeaningfulWeakEntries(entries, accuracyThreshold = 0.85){
+    return sortWeakest(entries)
+        .filter(entry => entry && entry.attempts >= 2)
+        .filter(entry => {
+            const accuracy = entry.accuracy === null || entry.accuracy === undefined
+                ? 1
+                : Number(entry.accuracy);
+
+            return accuracy < accuracyThreshold || entry.timeRatio > 1.35;
+        });
 }
 
 function hasMeaningfulWeakness(entries, accuracyThreshold = 0.85){
@@ -8246,9 +8398,9 @@ function getMasteryReportData(){
     const behavior = getRecentBehaviorSignals();
 
     const strongest = sortStrongest([...objectiveEntries, ...tagEntries]).slice(0, 4);
-    const weakestObjectives = sortWeakest(objectiveEntries).slice(0, 4);
-    const weakestTypes = sortWeakest(typeEntries).slice(0, 3);
-    const weakestSkills = sortWeakest(skillEntries).slice(0, 3);
+    const weakestObjectives = getMeaningfulWeakEntries(objectiveEntries, 0.85).slice(0, 4);
+    const weakestTypes = getMeaningfulWeakEntries(typeEntries, 0.85).slice(0, 3);
+    const weakestSkills = getMeaningfulWeakEntries(skillEntries, 0.85).slice(0, 3);
 
     const hasObjectiveWeakness = hasMeaningfulWeakness(objectiveEntries, 0.85);
     const hasTypeWeakness = hasMeaningfulWeakness(typeEntries, 0.85);
@@ -8681,6 +8833,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
