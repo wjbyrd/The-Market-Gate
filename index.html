@@ -2725,7 +2725,7 @@ const hallwayImages = [
 ];
 
 let soundEnabled = true;
-const SOUND_PREF_KEY = "marektGateSoundEnabled";
+const SOUND_PREF_KEY = "marketGateSoundEnabled";
 
 function updateSoundToggle(){
   const button = document.getElementById("soundToggle");
@@ -3336,6 +3336,7 @@ function loadSavedGame(){
 
         conceptMemory = saveData.conceptMemory || {};
         masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
+        if(!masteryState.bySkill) masteryState.bySkill = {};
         adaptiveMode = saveData.adaptiveMode || "support";
         tagHistory = saveData.tagHistory || [];
         lastTypes = saveData.lastTypes || [];
@@ -3479,6 +3480,10 @@ function getSkillKey(question){
 function getSkillBucket(question){
     const skill = getSkillKey(question);
     if(!skill) return null;
+
+    if(!masteryState.bySkill){
+        masteryState.bySkill = {};
+    }
 
     if(!masteryState.bySkill[skill]){
         masteryState.bySkill[skill] = {
@@ -4064,6 +4069,35 @@ function getWeakestBossObjective(bank){
     });
 
     return weakestObjective || eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
+}
+
+function getScaffoldedBossGroups(bank){
+    if(!Array.isArray(bank) || bank.length === 0) return [];
+
+    const groupedByObjective = {};
+
+    bank.forEach(question => {
+        const objective = getBossObjectiveKey(question);
+        if(!objective) return;
+
+        if(!groupedByObjective[objective]){
+            groupedByObjective[objective] = [];
+        }
+
+        groupedByObjective[objective].push(question);
+    });
+
+    const groups = [];
+
+    Object.values(groupedByObjective).forEach(objectiveQuestions => {
+        const sorted = [...objectiveQuestions].sort((a, b) => a.id - b.id);
+
+        for(let i = 0; i + 2 < sorted.length; i += 3){
+            groups.push(sorted.slice(i, i + 3));
+        }
+    });
+
+    return groups;
 }
 
 function getSelectionProfile(){
@@ -4737,15 +4771,15 @@ function endTimedAttemptEarly(){
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
 
+    const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
+
     localStorage.setItem("marketGateTimedLastRoom", String(room));
+    localStorage.setItem("marketGateTimedLastHighestRoom", String(reachedRoom));
     localStorage.setItem("marketGateTimedLastAccuracy", String(accuracy));
     localStorage.setItem("marketGateTimedLastAttempts", String(totalAttempts));
     localStorage.setItem("marketGateTimedLastStreak", String(maxStreak));
 
-    const bestRoom = Number(localStorage.getItem("marketGateTimedBestRoom") || 0);
-    if(room > bestRoom){
-        localStorage.setItem("marketGateTimedBestRoom", String(room));
-    }
+    recordTimedTrialAchievementStats(accuracy, reachedRoom);
 
     returnToModeSelectFromRun();
 }
@@ -5603,7 +5637,7 @@ mediumBoss: [
    
 finalBoss: [
 { id: 4000, q: "A city sets a price ceiling below equilibrium to make apartments affordable. The legal rent falls, but renters wait longer, landlords reduce maintenance, and some units are rented off-book. What is the strongest economic conclusion?", options: ["The posted price falls, but shortage shifts part of the cost into waiting, quality loss, and rationing", "The posted price falls, so the policy removes the main cost renters face in the market", "The posted price falls, but the shortage means sellers now compete harder for renters", "The posted price falls, so the market clears through a lower equilibrium rent"], a: 0, tag: "price_ceiling", type: "synthesis", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_unintended_consequences", secondarySkills: ["shortage", "nonmoney_rationing", "misallocation"], repairSkill: "binding_price_ceiling", commonError: "focuses_only_on_lower_legal_price", feedback: "A binding ceiling can lower the posted price while creating shortage, search costs, lower quality, rationing, and misallocation." },
-{ id: 4001, q: "A city sets a price ceiling below equilibrium to make apartments affordable. The legal rent falls, but renters wait longer, landlords reduce maintenance, and some units are rented off-book. What is the strongest economic conclusion?", options: ["The posted money price falls, but shortage creates nonmoney costs and misallocation", "The policy eliminates scarcity because rent is lower", "The policy creates a surplus because renters want fewer apartments", "The policy is nonbinding because people still pay with time"], a: 0, tag: "price_ceiling", type: "synthesis", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_unintended_consequences", secondarySkills: ["shortage", "nonmoney_rationing", "misallocation"], repairSkill: "binding_price_ceiling", commonError: "focuses_only_on_lower_legal_price", feedback: "A binding ceiling can lower the posted price while creating shortage, search costs, lower quality, rationing, and misallocation." },
+{ id: 4001, q: "Refer to the ceiling/floor graph. The market equilibrium is $30 and 200 units. If a legal maximum price is set at $20, what shortage results?", options: ["150 units", "100 units", "50 units", "250 units"], a: 0, tag: "price_ceiling", type: "graph_calculation", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "binding_ceiling_shortage_calculation", secondarySkills: ["quantity_demanded", "quantity_supplied", "shortage"], repairSkill: "binding_price_ceiling", commonError: "subtracts_quantity_demanded_from_quantity_supplied", feedback: "At $20, quantity demanded is 250 and quantity supplied is 100. The shortage is 250 - 100 = 150 units.", image: "ceilingfloor.webp" },
 { id: 4002, q: "A price ceiling is set at $40. The equilibrium price is $35. At $40, quantity supplied equals quantity demanded. What happens in the market?", options: ["The ceiling is nonbinding and the market remains at equilibrium", "The ceiling is binding and creates a shortage", "The ceiling is binding and creates a surplus", "The ceiling forces quantity supplied below quantity demanded"], a: 0, tag: "price_ceiling", type: "trap", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "nonbinding_price_ceiling", secondarySkills: ["binding_policy", "equilibrium"], repairSkill: "binding_price_ceiling", commonError: "thinks_all_price_ceilings_bind", feedback: "A ceiling only binds if it is below equilibrium. A ceiling above equilibrium does not change the market outcome." },
 { id: 4003, q: "The Magistrate sets a minimum wage at $16 when the equilibrium wage is $12. At $16, firms demand 70,000 workers and 110,000 workers want jobs. What is the best diagnosis?", options: ["The floor is binding and creates a labor surplus of 40,000 workers", "The floor is binding and creates a labor shortage of 40,000 workers", "The floor is nonbinding because workers prefer higher wages", "The floor increases labor demand by 40,000 workers"], a: 0, tag: "price_floor", type: "multi-step", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "binding_floor_surplus_calculation", secondarySkills: ["minimum_wage", "labor_surplus", "unemployment"], repairSkill: "binding_price_floor", commonError: "confuses_labor_surplus_with_shortage", feedback: "A price floor above equilibrium is binding. Labor surplus equals quantity supplied minus quantity demanded, so 110,000 - 70,000 = 40,000 workers." },
 { id: 4004, q: "A minimum wage raises pay for workers who keep their jobs, but firms hire fewer workers and more workers seek jobs. Which statement gives the best economic interpretation?", options: ["The policy helps some employed workers, but it also creates a labor surplus among workers seeking jobs", "The policy helps workers as a group because the higher wage applies to anyone willing to work", "The policy helps firms attract more workers, so labor demand rises with the legal wage", "The policy leaves employment unchanged because only the legal wage has changed"], a: 0, tag: "price_floor", type: "synthesis", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "minimum_wage_tradeoff", secondarySkills: ["policy_tradeoff", "labor_surplus", "quantity_demanded_labor"], repairSkill: "binding_price_floor", commonError: "counts_only_workers_who_keep_jobs", feedback: "A binding minimum wage creates winners and losers. Some employed workers earn more, but firms hire fewer workers and a labor surplus appears." },
@@ -5619,7 +5653,10 @@ finalBoss: [
 { id: 4014, q: "A binding price floor raises the legal price from $30 to $45. At $45, sellers offer 900 units and buyers want 600 units. Which outcome is most likely?", options: ["A surplus of 300 units and extra effort by sellers to unload the good", "A shortage of 300 units and long lines for buyers", "No surplus because sellers prefer the higher price", "A demand increase because the higher price signals quality"], a: 0, tag: "price_floor", type: "multi-step", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "floor_surplus_rationing", secondarySkills: ["surplus_calculation", "seller_competition"], repairSkill: "binding_price_floor", commonError: "ignores_quantity_demanded_response", feedback: "At the floor, quantity supplied exceeds quantity demanded by 300 units. Sellers compete to find buyers, often through nonprice margins." },
 { id: 4015, q: "A policy lowers the legal price, creates a shortage, reduces product quality, and causes buyers to spend time searching. Which policy best matches this pattern?", options: ["A binding price ceiling", "A binding price floor", "A nonbinding price floor", "A seller tax with perfectly elastic demand"], a: 0, tag: "price_ceiling", type: "integration", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "identify_policy_from_outcomes", secondarySkills: ["shortage", "quality_decline", "search_costs"], repairSkill: "binding_price_ceiling", commonError: "misidentifies_shortage_policy", feedback: "Lower legal price plus shortage and search costs points to a binding price ceiling." },
 { id: 4016, q: "A policy raises the legal price, creates unsold output, and benefits some sellers while making buyers purchase less. Which policy best matches this pattern?", options: ["A binding price floor", "A binding price ceiling", "A nonbinding price ceiling", "A buyer tax that leaves quantity unchanged"], a: 0, tag: "price_floor", type: "integration", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "identify_floor_from_outcomes", secondarySkills: ["surplus", "quantity_demanded", "policy_tradeoff"], repairSkill: "binding_price_floor", commonError: "misidentifies_surplus_policy", feedback: "Higher legal price plus unsold output points to a binding price floor." },
-{ id: 4017, q: "The Magistrate compares two policies. Policy A is a binding price ceiling that creates a shortage. Policy B is a tax that creates a wedge between buyer price and seller price. What do both policies have in common?", options: ["Both can reduce the quantity traded below the unregulated market equilibrium", "Both can raise the posted price buyers pay above the original equilibrium price", "Both can create excess supply at the legal market price", "Both can leave the market efficient if the legal price is clearly stated"], a: 0, tag: "government_policy", type: "integration", objective: "LO6.3", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "policy_comparison_quantity_effects", secondarySkills: ["price_ceiling", "tax_wedge", "quantity_traded"], repairSkill: "government_policy_effects", commonError: "focuses_only_on_price_not_quantity", feedback: "Binding ceilings and taxes work differently, but both can reduce the quantity traded below the unregulated equilibrium." }
+{ id: 4017, q: "The Magistrate compares two policies. Policy A is a binding price ceiling that creates a shortage. Policy B is a tax that creates a wedge between buyer price and seller price. What do both policies have in common?", options: ["Both can reduce the quantity traded below the unregulated market equilibrium", "Both can raise the posted price buyers pay above the original equilibrium price", "Both can create excess supply at the legal market price", "Both can leave the market efficient if the legal price is clearly stated"], a: 0, tag: "government_policy", type: "integration", objective: "LO6.3", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "policy_comparison_quantity_effects", secondarySkills: ["price_ceiling", "tax_wedge", "quantity_traded"], repairSkill: "government_policy_effects", commonError: "focuses_only_on_price_not_quantity", feedback: "Binding ceilings and taxes work differently, but both can reduce the quantity traded below the unregulated equilibrium." },
+{ id: 4018, q: "Refer to the tax-incidence graph. The tax shown raises the buyer price to $18, lowers the seller price to $12, and reduces quantity to 80. If the same per-unit tax were legally imposed on buyers instead of sellers, what would change?", options: ["Nothing about the final buyer price, seller price, or quantity", "Buyers would pay $12, sellers would receive $18, and quantity would remain 80", "Buyers would bear the entire tax, so sellers would still receive $15", "The tax wedge would disappear because supply would no longer shift"], a: 0, tag: "tax_equivalence", type: "graph_integration", objective: "LO6.4", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "buyer_seller_tax_equivalence", secondarySkills: ["tax_wedge", "statutory_incidence", "economic_incidence"], repairSkill: "tax_equivalence", commonError: "thinks_legal_assignment_changes_market_outcome", feedback: "An equal per-unit tax creates the same wedge and equilibrium whether the law assigns payment to buyers or sellers.", image: "taxincidence.webp" },
+{ id: 4019, q: "A binding rent ceiling creates a 200-unit shortage. The city allocates apartments to whoever waits in line longest. Which conclusion best completes the analysis?", options: ["The money price is lower, but time costs rise and apartments may not go to those who value them most", "The lower money price eliminates the economic cost of housing", "Waiting lines prove that quantity supplied now exceeds quantity demanded", "The allocation is efficient because every renter faces the same legal price"], a: 0, tag: "price_ceiling", type: "integration", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_nonmoney_costs_and_misallocation", secondarySkills: ["shortage", "search_costs", "rationing"], repairSkill: "binding_price_ceiling", commonError: "ignores_nonmoney_price_and_misallocation", feedback: "A binding ceiling lowers the posted price but can replace money costs with waiting, search, quality loss, and inefficient rationing." },
+{ id: 4020, q: "The government sets a crop price floor above equilibrium and promises to buy any unsold output. Which result is most likely?", options: ["Farmers produce more than consumers buy, so the government purchases and stores the surplus", "Consumers buy more because the legal price is higher", "The policy creates a shortage because quantity demanded exceeds quantity supplied", "The floor is nonbinding because the government participates in the market"], a: 0, tag: "price_floor", type: "integration", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "price_floor_government_surplus_purchase", secondarySkills: ["surplus", "government_purchase", "policy_tradeoff"], repairSkill: "binding_price_floor", commonError: "confuses_government_purchase_with_market_clearing", feedback: "A binding price floor creates excess supply. A purchase guarantee shifts the unsold surplus to the government rather than making it disappear." }
 ],
    
 easy: [
@@ -6594,58 +6631,50 @@ if (isBoss) {
     // Boss pools are scaffolded by LO, not random tag soup.
     if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
         const bank = [...(questionBanks[diff] || [])];
-        let chosenObjective = getWeakestBossObjective(bank);
+        const chosenObjective = getWeakestBossObjective(bank);
 
         let candidatePool = chosenObjective
             ? bank.filter(q => getBossObjectiveKey(q) === chosenObjective)
             : [];
 
-        // Prefer unused questions inside the chosen objective.
-        let unusedCandidatePool = candidatePool.filter(q => {
-            if(!q) return false;
-            if(usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
-            return true;
-        });
-
-        if(unusedCandidatePool.length >= 3){
-            candidatePool = unusedCandidatePool;
-        }
-
-        // If the weakest objective cannot support a full boss set, use another objective with at least 3 questions.
-        if (candidatePool.length < 3) {
-            const eligibleObjectives = [...new Set(
-                bank.map(q => getBossObjectiveKey(q)).filter(Boolean)
-            )].filter(obj =>
-                bank.filter(q => getBossObjectiveKey(q) === obj).length >= 3
-            );
-
-            if(eligibleObjectives.length > 0){
-                const randomObjective = eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
-                candidatePool = bank.filter(q => getBossObjectiveKey(q) === randomObjective);
-            }
-        }
-
-        // Last-resort fallback: use any unused questions from this difficulty.
-        if (candidatePool.length < 3) {
-            candidatePool = bank.filter(q => {
-                if (!q) return false;
-                if (usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
-                return true;
-            });
-        }
-
-        // If used-question filtering leaves too few, reset and use the whole bank.
-        if (candidatePool.length < 3) {
-            if (usedQuestions[diff]) usedQuestions[diff] = [];
+        if(candidatePool.length < 3){
             candidatePool = [...bank];
         }
 
-		if (diff === "legendaryBoss") {
-   		    bossPool = shuffle([...candidatePool]).slice(0, 3);
-		} else {
-		    bossPool = [...candidatePool]
-   		        .sort((a, b) => a.id - b.id)
-                .slice(0, 3);
+        if(diff === "legendaryBoss"){
+            const unusedCandidates = candidatePool.filter(q =>
+                q && !(usedQuestions[diff] || []).includes(q.id)
+            );
+
+            const sourcePool = unusedCandidates.length >= 3
+                ? unusedCandidates
+                : candidatePool;
+
+            bossPool = shuffle([...sourcePool]).slice(0, 3);
+        } else {
+            let groups = getScaffoldedBossGroups(candidatePool);
+
+            if(groups.length === 0){
+                groups = getScaffoldedBossGroups(bank);
+            }
+
+            const unusedGroups = groups.filter(group =>
+                group.every(q => !(usedQuestions[diff] || []).includes(q.id))
+            );
+
+            const availableGroups = unusedGroups.length > 0
+                ? unusedGroups
+                : groups;
+
+            if(availableGroups.length > 0){
+                bossPool = [...availableGroups[
+                    Math.floor(Math.random() * availableGroups.length)
+                ]];
+            } else {
+                bossPool = [...bank]
+                    .sort((a, b) => a.id - b.id)
+                    .slice(0, 3);
+            }
         }
 
         if (usedQuestions[diff]) {
@@ -7028,8 +7057,6 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
     if (isCorrect) {
         streak++;
         if (streak > maxStreak) maxStreak = streak;
-        recordRealmCorrectAnswer();
-        recordRealmStreak(streak);
     } else {
         streak = 0;
         recordBossMistakeForAchievements();
