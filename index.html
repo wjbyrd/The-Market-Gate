@@ -4273,8 +4273,8 @@ function getRemediationQuestion(state){
     const excludeIds = [state.originQuestionId].filter(Boolean);
 
     if(state.stage === "repair"){
-        if(state.skill && microSkillRepairPools[state.skill]){
-            const skillRepairPool = microSkillRepairPools[state.skill] || [];
+      const skillRepairPool = directSkillRepairRoutes[state.skill] || microSkillRepairPools[state.skill] || [];
+      if(state.skill && skillRepairPool.length){
             const skillRepairCandidates = getQuestionsMatchingNeed(
                 skillRepairPool,
                 state.objective,
@@ -6118,6 +6118,56 @@ const microSkillRepairPools = {
     { id: 5025, q: "If demand is less elastic than supply, who bears more of a tax?", options: ["Buyers", "Sellers", "Neither side", "Only the government"], a: 0, tag: "tax_incidence", type: "interpretation", objective: "LO6.5", difficulty: "repair", conceptCluster: "government_policy", primarySkill: "tax_incidence_less_elastic_side", repairSkill: "tax_incidence_less_elastic_side", commonError: "gets_less_elastic_side_backwards", feedback: "If demand is less elastic, buyers bear more of the tax burden." }
   ]
 };
+
+const skillRepairSeedPools = {
+  core_opportunity_cost:[{"id":30000,"q":"Repair check: If choosing one option means giving up the next-best alternative, the value given up is:","options":["Opportunity cost","A sunk cost","A price ceiling","Consumer surplus"],"a":0,"tag":"opportunity_cost","type":"repair","objective":"LO1.2","difficulty":"microRepair","primarySkill":"core_opportunity_cost","repairSkill":"core_opportunity_cost","feedback":"Opportunity cost is the value of the next-best alternative forgone."}],
+  core_marginal:[{"id":30001,"q":"Repair check: A decision should continue when:","options":["Marginal benefit is at least marginal cost","Total cost is zero","Average cost is falling","Demand is perfectly elastic"],"a":0,"tag":"marginal","type":"repair","objective":"LO1.3","difficulty":"microRepair","primarySkill":"core_marginal","repairSkill":"core_marginal","feedback":"Marginal reasoning compares the next benefit with the next cost."}],
+  core_tradeoffs:[{"id":30002,"q":"Repair check: A policy improves efficiency but reduces equality. What does this illustrate?","options":["A tradeoff","A shortage","A movement along demand","Perfect competition"],"a":0,"tag":"tradeoffs","type":"repair","objective":"LO1.1","difficulty":"microRepair","primarySkill":"core_tradeoffs","repairSkill":"core_tradeoffs","feedback":"A tradeoff requires weighing competing goals; improvement in one dimension can come at a cost in another."}],
+  core_scarcity:[{"id":30003,"q":"Repair check: Scarcity exists because:","options":["Resources are limited while wants are unlimited","Prices are always high","All goods are public goods","Markets never adjust"],"a":0,"tag":"scarcity","type":"repair","objective":"LO1.1","difficulty":"microRepair","primarySkill":"core_scarcity","repairSkill":"core_scarcity","feedback":"Scarcity is the fundamental condition of limited resources relative to unlimited wants."}],
+  core_models:[{"id":30004,"q":"Repair check: Economists use models mainly to:","options":["Simplify reality and isolate important relationships","Include every detail of the economy","Eliminate the need for assumptions","Guarantee policy success"],"a":0,"tag":"models","type":"repair","objective":"LO2.1","difficulty":"microRepair","primarySkill":"core_models","repairSkill":"core_models","feedback":"Models deliberately simplify so the important causal relationships can be studied."}],
+  core_incentives:[{"id":30005,"q":"Repair check: An incentive is:","options":["Something that changes the costs or benefits of an action","A guarantee that everyone acts identically","A fixed market price","A definition of GDP"],"a":0,"tag":"incentives","type":"repair","objective":"LO1.4","difficulty":"microRepair","primarySkill":"core_incentives","repairSkill":"core_incentives","feedback":"Incentives alter the benefits or costs people consider when choosing."}],
+  core_market_failure:[{"id":30006,"q":"Repair check: A market failure occurs when:","options":["Market outcomes do not efficiently allocate resources","Every buyer and seller agrees on price","Demand slopes downward","A firm earns profit"],"a":0,"tag":"market_failure","type":"repair","objective":"LO1.6","difficulty":"microRepair","primarySkill":"core_market_failure","repairSkill":"core_market_failure","feedback":"Market failure describes cases where decentralized market outcomes are inefficient."}],
+  core_competitive_market:[{"id":30007,"q":"Repair check: A price-taking firm is one that:","options":["Cannot individually influence the market price","Sets any price it wants","Faces no competitors","Always earns zero profit"],"a":0,"tag":"competitive_market","type":"repair","objective":"LO4.1","difficulty":"microRepair","primarySkill":"core_competitive_market","repairSkill":"core_competitive_market","feedback":"In a competitive market, an individual firm is too small to affect the market price."}],
+  core_price_signal:[{"id":30008,"q":"Repair check: A higher market price normally signals producers to:","options":["Increase quantity supplied","Decrease quantity supplied","Demand less automatically","Ignore the market"],"a":0,"tag":"price_signal","type":"repair","objective":"LO4.5","difficulty":"microRepair","primarySkill":"core_price_signal","repairSkill":"core_price_signal","feedback":"Higher prices communicate greater relative value and encourage producers to supply more."}],
+  core_tax_equivalence:[{"id":30009,"q":"Repair check: Whether a tax is legally collected from buyers or sellers, its economic burden depends mainly on:","options":["Relative elasticities","Which side writes the check","The number of firms only","The tax's label"],"a":0,"tag":"tax_equivalence","type":"repair","objective":"LO6.4","difficulty":"microRepair","primarySkill":"core_tax_equivalence","repairSkill":"core_tax_equivalence","feedback":"Legal incidence does not determine economic incidence; elasticities determine who bears more burden."}],
+  core_trade:[{"id":30010,"q":"Repair check: Voluntary trade can benefit both sides when:","options":["Each expects to gain from the exchange","One side is forced to trade","Prices are zero","All goods are identical"],"a":0,"tag":"trade","type":"repair","objective":"LO1.5","difficulty":"microRepair","primarySkill":"core_trade","repairSkill":"core_trade","feedback":"People voluntarily trade because each expects the exchange to make them better off."}],
+  core_markets:[{"id":30011,"q":"Repair check: In a market system, prices help allocate resources by:","options":["Coordinating buyers' and sellers' decisions","Eliminating all tradeoffs","Fixing output at one level","Replacing incentives"],"a":0,"tag":"markets","type":"repair","objective":"LO1.6","difficulty":"microRepair","primarySkill":"core_markets","repairSkill":"core_markets","feedback":"Prices convey information and coordinate decentralized decisions about production and consumption."}],
+  core_micro_macro:[{"id":30012,"q":"Repair check: Which question is macroeconomic?","options":["Why is national unemployment rising?","How should one bakery price a muffin?","Which phone should one student buy?","How many workers should one store hire?"],"a":0,"tag":"micro_macro","type":"repair","objective":"LO2.3","difficulty":"microRepair","primarySkill":"core_micro_macro","repairSkill":"core_micro_macro","feedback":"Macroeconomics studies economy-wide outcomes such as unemployment, inflation, and total output."}],
+  core_policy:[{"id":30013,"q":"Repair check: The economist's role in policy analysis is primarily to:","options":["Clarify likely tradeoffs and consequences","Choose everyone's values","Guarantee a policy works","Eliminate scarcity"],"a":0,"tag":"policy","type":"repair","objective":"LO2.5","difficulty":"microRepair","primarySkill":"core_policy","repairSkill":"core_policy","feedback":"Economics can analyze consequences and tradeoffs, while value judgments remain separate choices."}],
+  core_policy_tradeoffs:[{"id":30014,"q":"Repair check: A policy tradeoff occurs when:","options":["Improving one goal makes another goal harder to achieve","A policy has no consequences","Supply equals demand","A tax is legally paid by sellers"],"a":0,"tag":"policy_tradeoffs","type":"repair","objective":"LO1.1","difficulty":"microRepair","primarySkill":"core_policy_tradeoffs","repairSkill":"core_policy_tradeoffs","feedback":"Policies often require balancing competing goals rather than delivering only benefits."}]
+};
+Object.assign(microSkillRepairPools, skillRepairSeedPools);
+
+function buildDirectSkillRepairRoutes(){
+  const sourcePools = Object.entries(microSkillRepairPools)
+    .filter(([, pool]) => Array.isArray(pool) && pool.length > 0);
+  const routes = new Map();
+
+  Object.values(questionBanks).flat().forEach(question => {
+    if(!question?.primarySkill) return;
+
+    const directMatch = sourcePools.find(([, pool]) => pool.some(repair =>
+      repair.objective === question.objective && repair.tag === question.tag
+    )) || sourcePools.find(([, pool]) => pool.some(repair =>
+      repair.objective === question.objective
+    )) || sourcePools.find(([, pool]) => pool.some(repair =>
+      repair.tag === question.tag
+    ));
+
+    if(directMatch){
+      const route = routes.get(question.primarySkill) || [];
+      directMatch[1].forEach(repair => {
+        if(!route.some(existing => existing.id === repair.id)) route.push(repair);
+      });
+      routes.set(question.primarySkill, route);
+    }
+  });
+
+  return Object.fromEntries(routes);
+}
+const directSkillRepairRoutes = buildDirectSkillRepairRoutes();
+
+
     
 const microSkillBridgePools = {
   movement_vs_demand_shift: [
@@ -8867,11 +8917,6 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
