@@ -4072,6 +4072,60 @@ function getBossQuestionFingerprint(question){
         .trim();
 }
 
+
+function getBossNarrativeStage(question){
+    const stage = String(question?.bossStage || "").toLowerCase();
+    return stage === "opening" || stage === "final" ? stage : null;
+}
+
+function orderBossQuestionSet(selected, available){
+    const ordered = [...(selected || [])];
+
+    const replaceDuplicateStage = stage => {
+        const stageIndexes = ordered
+            .map((question, index) => ({ question, index }))
+            .filter(item => getBossNarrativeStage(item.question) === stage)
+            .map(item => item.index);
+
+        stageIndexes.slice(1).forEach(index => {
+            const selectedIds = new Set(
+                ordered.map(question => question?.id).filter(id => id !== undefined)
+            );
+            const candidates = shuffle(
+                (available || []).filter(question =>
+                    question &&
+                    !selectedIds.has(question.id) &&
+                    getBossNarrativeStage(question) !== stage
+                )
+            );
+            const replacement = candidates.find(question =>
+                getBossNarrativeStage(question) === null
+            ) || candidates[0];
+
+            if(replacement){
+                ordered[index] = replacement;
+            }
+        });
+    };
+
+    replaceDuplicateStage("final");
+    replaceDuplicateStage("opening");
+
+    const stageRank = stage =>
+        stage === "opening" ? 0 : stage === "final" ? 2 : 1;
+
+    return ordered
+        .map((question, index) => ({
+            question,
+            index,
+            stage: getBossNarrativeStage(question)
+        }))
+        .sort((a, b) =>
+            stageRank(a.stage) - stageRank(b.stage) || a.index - b.index
+        )
+        .map(item => item.question);
+}
+
 function getRecentQuestionFingerprints(limitPerPool = 15){
     const recentIds = new Set();
 
@@ -4176,7 +4230,7 @@ function buildBossQuestionSet(bank, poolName, chosenObjective){
         remaining.splice(remaining.findIndex(item => item.id === picked.id), 1);
     }
 
-    return selected;
+    return orderBossQuestionSet(selected, available);
 }
 
 function getSelectionProfile(){
@@ -5653,7 +5707,7 @@ legendaryBoss: [
 ],
 easyBoss: [
   // --- OPPORTUNITY COST ---
-  { id: 2000, q: "The Frontier Keeper opens the first gate: 'Every choice has a shadow.' What is opportunity cost?", options: ["The value of the next best alternative given up", "Only the money price paid", "The total amount spent on all choices", "The legal maximum price"], a: 0, tag: "opportunity_cost", type: "definition", objective: "LO1.2", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "opportunity_cost_definition", secondarySkills: ["tradeoff_identification"], repairSkill: "opportunity_cost_definition", commonError: "treats_opportunity_cost_as_only_money_cost", feedback: "Opportunity cost is the value of the next best alternative given up." },
+  { id: 2000, bossStage: "opening", q: "The Frontier Keeper opens the first gate: 'Every choice has a shadow.' What is opportunity cost?", options: ["The value of the next best alternative given up", "Only the money price paid", "The total amount spent on all choices", "The legal maximum price"], a: 0, tag: "opportunity_cost", type: "definition", objective: "LO1.2", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "opportunity_cost_definition", secondarySkills: ["tradeoff_identification"], repairSkill: "opportunity_cost_definition", commonError: "treats_opportunity_cost_as_only_money_cost", feedback: "Opportunity cost is the value of the next best alternative given up." },
   { id: 2001, q: "The Frontier Keeper offers two paths: earn $90 working or attend a free review session. If the student attends the review, what is part of the opportunity cost?", options: ["The $90 in forgone wages", "Nothing because the session is free", "Only the time spent walking there", "The equilibrium price of tutoring"], a: 0, tag: "opportunity_cost", type: "interpretation", objective: "LO1.2", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "opportunity_cost_identification", secondarySkills: ["opportunity_cost_definition"], repairSkill: "opportunity_cost_definition", commonError: "ignores_forgone_alternative", feedback: "A free activity can still have an opportunity cost if it means giving up another valuable option." },
   { id: 2002, q: "The Frontier Keeper gives three choices: work for $80, study for a test worth $60, or attend a free concert. If the student chooses the concert, what is the opportunity cost?", options: ["$80", "$140", "$60", "$0 because the concert is free"], a: 0, tag: "opportunity_cost", type: "trap", objective: "LO1.2", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "next_best_alternative", secondarySkills: ["opportunity_cost_definition"], repairSkill: "opportunity_cost_definition", commonError: "adds_all_forgone_options_instead_of_next_best", feedback: "Opportunity cost is the value of the next best alternative, not every alternative added together. The next best option is the $80 shift." },
 
@@ -5680,7 +5734,7 @@ easyBoss: [
   // --- MARKET FAILURE ---
   { id: 2015, q: "The Frontier Keeper says: 'Markets are powerful, not perfect.' What is market failure?", options: ["A situation where the market fails to allocate resources efficiently", "Any situation where prices change", "Any voluntary trade between buyers and sellers", "A point on the PPF"], a: 0, tag: "market_failure", type: "definition", objective: "LO1.6", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "market_failure_definition", secondarySkills: ["market_failure_types"], repairSkill: "market_failure_types", commonError: "thinks_any_bad_outcome_is_market_failure", feedback: "Market failure occurs when the market does not allocate resources efficiently." },
   { id: 2016, q: "A factory pollutes a river used by nearby residents. What kind of market failure is this?", options: ["A negative externality", "A public good", "A price floor", "A positive statement"], a: 0, tag: "market_failure", type: "interpretation", objective: "LO1.6", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "externality_identification", secondarySkills: ["market_failure_types"], repairSkill: "market_failure_types", commonError: "confuses_externality_with_private_cost", feedback: "Pollution harms bystanders who are not part of the transaction, so it is a negative externality." },
-  { id: 2017, q: "The Frontier Keeper gives the final trap: which case is not automatically a market failure?", options: ["A buyer voluntarily pays a high price for coffee", "A factory pollutes a river", "A seller has market power", "A public good is underprovided"], a: 0, tag: "market_failure", type: "trap", objective: "LO1.6", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "market_failure_identification", secondarySkills: ["market_failure_types"], repairSkill: "market_failure_types", commonError: "treats_high_price_as_market_failure_by_itself", feedback: "A high voluntary price is not automatically a market failure. Externalities, public goods, and market power are stronger market-failure cases." }
+  { id: 2017, bossStage: "final", q: "The Frontier Keeper gives the final trap: which case is not automatically a market failure?", options: ["A buyer voluntarily pays a high price for coffee", "A factory pollutes a river", "A seller has market power", "A public good is underprovided"], a: 0, tag: "market_failure", type: "trap", objective: "LO1.6", difficulty: "easyBoss", conceptCluster: "core_principles", primarySkill: "market_failure_identification", secondarySkills: ["market_failure_types"], repairSkill: "market_failure_types", commonError: "treats_high_price_as_market_failure_by_itself", feedback: "A high voluntary price is not automatically a market failure. Externalities, public goods, and market power are stronger market-failure cases." }
 ],
    
 mediumBoss: [
@@ -5712,7 +5766,7 @@ mediumBoss: [
   // --- PRICE SIGNALS ---
   { id: 3015, q: "The Broker says: 'Prices speak when no one gives orders.' What role do prices play in a market economy?", options: ["They signal scarcity and help allocate resources", "They eliminate scarcity completely", "They prevent all shortages forever", "They remove opportunity cost"], a: 0, tag: "price_signal", type: "definition", objective: "LO4.5", difficulty: "mediumBoss", conceptCluster: "supply_demand", primarySkill: "price_signal_allocation", secondarySkills: ["market_allocation_definition"], repairSkill: "price_signal_allocation", commonError: "thinks_prices_only_transfer_money", feedback: "Prices send signals to buyers and sellers about scarcity, value, and incentives." },
   { id: 3016, q: "A resource becomes scarce, and its price rises. How do buyers and sellers usually respond?", options: ["Buyers buy less while sellers try to supply more", "Buyers buy more while sellers supply less", "Both buyers and sellers ignore the signal", "Demand and supply both disappear"], a: 0, tag: "price_signal", type: "interpretation", objective: "LO4.5", difficulty: "mediumBoss", conceptCluster: "supply_demand", primarySkill: "buyer_seller_response_to_price_signal", secondarySkills: ["law_of_demand", "law_of_supply"], repairSkill: "price_signal_allocation", commonError: "confuses_buyer_response_with_seller_response", feedback: "Higher prices encourage buyers to conserve and sellers to produce more." },
-  { id: 3017, q: "The Broker gives the final trap: a high price by itself means the market has failed. What is wrong with that claim?", options: ["A high price can be a scarcity signal, not automatically a market failure", "High prices always prove demand disappeared", "High prices always mean a price ceiling is binding", "High prices eliminate the need for supply"], a: 0, tag: "price_signal", type: "trap", objective: "LO4.5", difficulty: "mediumBoss", conceptCluster: "supply_demand", primarySkill: "price_signal_interpretation", secondarySkills: ["market_failure_identification"], repairSkill: "price_signal_allocation", commonError: "treats_high_price_as_market_failure_by_itself", feedback: "A high price may simply signal scarcity and guide buyers and sellers. It is not automatically a market failure." }
+  { id: 3017, bossStage: "final", q: "The Broker gives the final trap: a high price by itself means the market has failed. What is wrong with that claim?", options: ["A high price can be a scarcity signal, not automatically a market failure", "High prices always prove demand disappeared", "High prices always mean a price ceiling is binding", "High prices eliminate the need for supply"], a: 0, tag: "price_signal", type: "trap", objective: "LO4.5", difficulty: "mediumBoss", conceptCluster: "supply_demand", primarySkill: "price_signal_interpretation", secondarySkills: ["market_failure_identification"], repairSkill: "price_signal_allocation", commonError: "treats_high_price_as_market_failure_by_itself", feedback: "A high price may simply signal scarcity and guide buyers and sellers. It is not automatically a market failure." }
 ],
    
 finalBoss: [
@@ -7364,6 +7418,8 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         localStorage.setItem("vaultScales", "true");
         showArtifact(artifacts.scales.img, artifacts.scales.title, artifacts.scales.text);
     }
+
+    updateMissionArtifactCountFromVault();
 }
 
 // ... (Inside the Boss Victory check)
