@@ -54,6 +54,7 @@ If you break something:
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
     
 <!-- Title can be changed to whatever the game needs -->
@@ -2504,7 +2505,7 @@ Respect structure strictly.
 <div id="startScreen">
   <div class="start-content">
     <h1 class="title">THE MARKET GATE</h1>
-    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
+    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input" aria-label="School email">
     <button class="start-btn" onclick="showModeSelect()">ENTER THE MARKET</button>
 	<button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
     CONTINUE STANDARD RUN</button>
@@ -2613,13 +2614,13 @@ DO NOT REMOVE:
     <div id="gameShell">
         <div id="wizardBox">
             <div id="wizardName">The Custodian</div>
-            <img src="../chancellor.webp" id="wizardImage" alt="The Chancellor">
+            <img src="../chancellor.webp" id="wizardImage" alt="The Custodian">
         </div>
 
         <!-- GAME -->
         <!-- Dynamic question + answer rendering (DO NOT rename IDs) -->
         <div id="gameBox">
-            <div id="autosave">💾 Market Signal Preserved</div>
+            <div id="autosave">💾 Market Gate Route Preserved</div>
             <p id="areaDisplay" class="area-title"></p>
 
             <div id="progressBar">
@@ -2853,7 +2854,7 @@ let runID = "";
 let questionStartTime = 0;
 let streak = 0; 
 let startTime; // Will be set in startGame()
-let room = localStorage.getItem("gauntletRoom") ? parseInt(localStorage.getItem("gauntletRoom")) : 1;
+let room = localStorage.getItem("marketGateRoom") ? parseInt(localStorage.getItem("marketGateRoom")) : 1;
 let currentQuestion = null;
 let detourActive = false;
 let detourReturnRoom = null;
@@ -3300,7 +3301,7 @@ function saveGameState(){
     };
 
     localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
-    localStorage.setItem("gauntletRoom", String(room));
+        localStorage.setItem("marketGateRoom", String(room));
 
     if(modeAllowsRealmProgress()){
 	    localStorage.setItem(REALM_STARTED_KEY, "true");
@@ -3363,7 +3364,7 @@ function clearSavedGame(){
     localStorage.removeItem(getSaveKey());
 
     if(modeAllowsSave()){
-        localStorage.removeItem("gauntletRoom");
+        localStorage.removeItem("marketGateRoom");
         localStorage.removeItem("vaultCompass");
         localStorage.removeItem("vaultLens");
         localStorage.removeItem("vaultScales");
@@ -3504,12 +3505,6 @@ function inferObjective(question){
     const q = (question.q || "").toLowerCase();
     const tag = (question.tag || "general").toLowerCase();
     const type = (question.type || "default").toLowerCase();
-
-// =============================================
-// MARKET GATE OBJECTIVE INFERENCE
-// Chapters 19–22: Risk, Information Asymmetry,
-// Moral Hazard, Incentives, Organizational Design
-// =============================================
 
 // =============================================
     // THE MARKET GATE OBJECTIVE INFERENCE
@@ -4910,7 +4905,7 @@ if(!hasSavedRun){
     resetScoreAttackState();
 
     if(modeAllowsSave()){
-        localStorage.removeItem("gauntletRoom");
+            localStorage.removeItem("marketGateRoom");
 	    localStorage.removeItem("vaultCompass");
 	    localStorage.removeItem("vaultLens");
 	    localStorage.removeItem("vaultScales");
@@ -5028,7 +5023,7 @@ function initializeRunForMode(mode){
                         ? "🔥 Legendary Mode Active"
                         : gameMode === "bossRush"
                             ? "⚔ Boss Rush Active"
-                            : "💾 Market Signal Preserved";
+            : "💾 Market Gate Route Preserved";
     }
 
     // SCORE ATTACK MODE ADDITION:
@@ -6445,9 +6440,9 @@ function updateMazeTrack() {
             box.innerText = "🟦";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="keeper.webp" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="broker.webp" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="magistrate.webp" class="boss-icon">';box.classList.add("boss30");}
+            if (i === 10){box.innerHTML = '<img src="keeper.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss10");}
+            else if (i === 20){box.innerHTML = '<img src="broker.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss20");}
+            else if (i === 30){box.innerHTML = '<img src="magistrate.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss30");}
             else box.innerText = "🟨";
         }
         
@@ -6601,6 +6596,15 @@ document.addEventListener("click", function(event){
 });
 
 document.addEventListener("keydown", function(event){
+    const target = event.target;
+    const graphImg = target && target.matches ? target.matches("#questionImageBox img") : false;
+
+    if(graphImg && (event.key === "Enter" || event.key === " ")){
+        event.preventDefault();
+        openGraphLightbox(target.src, target.alt);
+        return;
+    }
+
     if(event.key === "Escape"){
         closeGraphLightbox();
     }
@@ -6741,7 +6745,7 @@ if (isBoss) {
     currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
 
     if (currentQuestion.image) {
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge" role="button" tabindex="0" aria-label="Open expanded question graph"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -6781,7 +6785,7 @@ if (isBoss) {
     }
 
     questionElement.innerHTML = `
-        <img src="${bossImage}" class="bossIcon ${bossClass}">
+        <img src="${bossImage}" class="bossIcon ${bossClass}" alt="${bTitle}">
         <span class="boss-title" style="color:${bColor}">${bTitle}</span>
         <div class="boss-q" style="--bossColor:${bColor}">
             ${currentQuestion.q}
@@ -6812,7 +6816,7 @@ if(gameMode === "legendary"){
     );
 
     if(currentQuestion.image){
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge" role="button" tabindex="0" aria-label="Open expanded question graph"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -6884,7 +6888,7 @@ else{
 }
 		
 if(currentQuestion.image){
-    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge" role="button" tabindex="0" aria-label="Open expanded question graph"><div class="graph-zoom-note">Click graph to enlarge</div>`;
     imageBox.style.display = "block";
 }
 
@@ -7242,7 +7246,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         `<span class='fade-out-text'>${getRecoveryLine("complete")}</span>`;
 
     room = returnRoom;
-    localStorage.setItem("gauntletRoom", room);
+       localStorage.setItem("marketGateRoom", room);
 
     setTimeout(loadQuestion, TIMING.normal);
     return;
@@ -7330,7 +7334,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
    room++;
    timedHighestRoom = Math.max(timedHighestRoom, Math.min(room, 30));
    saveGameState();
-   localStorage.setItem("gauntletRoom", room);
+        localStorage.setItem("marketGateRoom", room);
 
    if(gameMode === "timed" && timedModeEndTime && Date.now() >= timedModeEndTime){
        endTimedModeRun();
@@ -7455,7 +7459,7 @@ room = Math.max(bossCheckpoint, newRoom);
 
 if(gameMode === "timed") timedSetbacks++;
 
-localStorage.setItem("gauntletRoom", room);
+    localStorage.setItem("marketGateRoom", room);
 	
 showGameModal({
     title: "Wrong Turn",
@@ -7523,15 +7527,15 @@ function handleStreakVisuals() {
     let streakColor = "#f0c86a";
 
     if (streak === 5) {
-        streakMsg = `<span class="streak"><img src="streaksignal.webp" class="streak-icon">DEMAND SIGNAL FOUND</span>`;
+        streakMsg = `<span class="streak"><img src="streaksignal.webp" class="streak-icon" alt="" aria-hidden="true">DEMAND SIGNAL FOUND</span>`;
         streakColor = "#f0c86a";
     }
     else if (streak === 10) {
-        streakMsg = `<span class="streak"><img src="streakkey.webp" class="streak-icon">ENTRY KEY CLAIMED</span>`;
+        streakMsg = `<span class="streak"><img src="streakkey.webp" class="streak-icon" alt="" aria-hidden="true">ENTRY KEY CLAIMED</span>`;
         streakColor = "#38bdf8";
     }
     else if (streak === 20) {
-        streakMsg = `<span class="streak"><img src="streakseal.webp" class="streak-icon">EQUILIBRIUM SEALED</span>`;
+        streakMsg = `<span class="streak"><img src="streakseal.webp" class="streak-icon" alt="" aria-hidden="true">EQUILIBRIUM SEALED</span>`;
         streakColor = "#f5e6b8";
     }
 
@@ -7599,6 +7603,7 @@ function showArtifact(img,title,text){
     let p = document.getElementById("artifactText");
 
     image.src = img;
+    image.alt = title;
     t.innerText = title;
     p.innerText = text;
 
@@ -8773,14 +8778,14 @@ function shuffleArray(arr){
 // Clearing browser data will erase scores.
 // =============================================
 function updateHighScores(newTimeMs) {
-    let scores = JSON.parse(localStorage.getItem("gauntletHighScores")) || [];
+    let scores = JSON.parse(localStorage.getItem("marketGateHighScores")) || [];
     scores.push({ name: username, time: newTimeMs, date: new Date().toLocaleDateString() });
     
     // Sort by time (lowest/fastest first) and keep top 5
     scores.sort((a, b) => a.time - b.time);
     scores = scores.slice(0, 5);
     
-    localStorage.setItem("gauntletHighScores", JSON.stringify(scores));
+    localStorage.setItem("marketGateHighScores", JSON.stringify(scores));
     return scores;
 }
 
@@ -8838,7 +8843,7 @@ Accuracy: ${accuracy}%
 Best Streak: ${maxStreak}
 Total Questions: ${totalAttempts}
 Code: ${code}
-Verified by The Chancellor`;
+Verified by The Custodian`;
 
     navigator.clipboard.writeText(shareText).then(() => {
         const btn = document.getElementById("shareBtn");
@@ -8917,7 +8922,6 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
-
 
 
 
