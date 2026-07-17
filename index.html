@@ -2519,25 +2519,25 @@ Respect structure strictly.
 
     <div class="mode-grid">
 <button class="mode-card" onclick="startSelectedMode('standard')" aria-label="Standard Campaign. Full 30-room run with bosses, artifacts, setbacks, save and resume status, and realm progress.">
-  <img src="../mode_standard.webp" alt="" aria-hidden="true">
+  <img src="mode_standard.webp" alt="" aria-hidden="true">
   <span class="mode-card-title">Standard Campaign</span>
   <span class="mode-card-text">Full 30-room run with bosses, artifacts, setbacks, and realm progress.</span>
 </button>
 
 <button class="mode-card" onclick="startSelectedMode('timed')" aria-label="Timed Trial. Ten minute run with visible countdown, normal setbacks, rapid guessing penalties, and results saved separately.">
-  <img src="../mode_timed.webp" alt="" aria-hidden="true">
+  <img src="mode_timed.webp" alt="" aria-hidden="true">
  <span class="mode-card-title">Timed Trial</span>
   <span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back.</span>
 </button>
 
 <button class="mode-card" onclick="startSelectedMode('exam')" aria-label="Exam Drill. No bosses, no artifacts, no realm progress. Just adaptive practice.">
-  <img src="../mode_exam.webp" alt="" aria-hidden="true">
+  <img src="mode_exam.webp" alt="" aria-hidden="true">
  <span class="mode-card-title">Exam Drill</span>
   <span class="mode-card-text">No bosses. No artifacts. No realm progress. Just adaptive practice.</span>
 </button>
 
 <button class="mode-card" onclick="startSelectedMode('legendary')" aria-label="Legendary Mode. Full 30-room campaign using only mastery-level multi-step questions with close answer choices.">
-  <img src="../mode_legendary.webp" alt="" aria-hidden="true">
+  <img src="mode_legendary.webp" alt="" aria-hidden="true">
   <span class="mode-card-title">Legendary Mode</span>
   <span class="mode-card-text">Full campaign. Legendary-only questions. Bosses still hit. No mercy.</span>
 </button>
@@ -2546,7 +2546,7 @@ Respect structure strictly.
      New arcade-style scoring mode. Uses the normal 30-room path and bosses,
      but does NOT count as Standard Campaign realm progress. -->
 <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished.">
-  <img src="../scoreattack.webp" alt="" aria-hidden="true">
+  <img src="scoreattack.webp" alt="" aria-hidden="true">
   <span class="mode-card-title">Score Attack</span>
   <span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span>
 </button>
@@ -2614,7 +2614,7 @@ DO NOT REMOVE:
     <div id="gameShell">
         <div id="wizardBox">
             <div id="wizardName">The Custodian</div>
-            <img src="../chancellor.webp" id="wizardImage" alt="The Custodian">
+            <img src="chancellor.webp" id="wizardImage" alt="The Custodian">
         </div>
 
         <!-- GAME -->
@@ -5633,7 +5633,7 @@ mediumBoss: [
    
 finalBoss: [
 { id: 4000, q: "A city sets a price ceiling below equilibrium to make apartments affordable. The legal rent falls, but renters wait longer, landlords reduce maintenance, and some units are rented off-book. What is the strongest economic conclusion?", options: ["The posted price falls, but shortage shifts part of the cost into waiting, quality loss, and rationing", "The posted price falls, so the policy removes the main cost renters face in the market", "The posted price falls, but the shortage means sellers now compete harder for renters", "The posted price falls, so the market clears through a lower equilibrium rent"], a: 0, tag: "price_ceiling", type: "synthesis", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "ceiling_unintended_consequences", secondarySkills: ["shortage", "nonmoney_rationing", "misallocation"], repairSkill: "binding_price_ceiling", commonError: "focuses_only_on_lower_legal_price", feedback: "A binding ceiling can lower the posted price while creating shortage, search costs, lower quality, rationing, and misallocation." },
-{ id: 4001, q: "Refer to the ceiling/floor graph. The market equilibrium is $30 and 200 units. If a legal maximum price is set at $20, what shortage results?", options: ["150 units", "100 units", "50 units", "250 units"], a: 0, tag: "price_ceiling", type: "graph_calculation", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "binding_ceiling_shortage_calculation", secondarySkills: ["quantity_demanded", "quantity_supplied", "shortage"], repairSkill: "binding_price_ceiling", commonError: "subtracts_quantity_demanded_from_quantity_supplied", feedback: "At $20, quantity demanded is 250 and quantity supplied is 100. The shortage is 250 - 100 = 150 units.", image: "ceilingfloor.webp" },
+{ id: 4001, q: "Refer to the ceiling/floor graph. The market equilibrium is $30 and 200 units. If a legal maximum price is set at $20, what shortage results?", options: ["150 units", "100 units", "50 units", "250 units"], a: 1, tag: "price_ceiling", type: "graph_calculation", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "binding_ceiling_shortage_calculation", secondarySkills: ["quantity_demanded", "quantity_supplied", "shortage"], repairSkill: "binding_price_ceiling", commonError: "subtracts_quantity_demanded_from_quantity_supplied", feedback: "At $20, quantity demanded is 250 and quantity supplied is 100. The shortage is 250 - 100 = 150 units.", image: "ceilingfloor.webp" },
 { id: 4002, q: "A price ceiling is set at $40. The equilibrium price is $35. At $40, quantity supplied equals quantity demanded. What happens in the market?", options: ["The ceiling is nonbinding and the market remains at equilibrium", "The ceiling is binding and creates a shortage", "The ceiling is binding and creates a surplus", "The ceiling forces quantity supplied below quantity demanded"], a: 0, tag: "price_ceiling", type: "trap", objective: "LO6.1", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "nonbinding_price_ceiling", secondarySkills: ["binding_policy", "equilibrium"], repairSkill: "binding_price_ceiling", commonError: "thinks_all_price_ceilings_bind", feedback: "A ceiling only binds if it is below equilibrium. A ceiling above equilibrium does not change the market outcome." },
 { id: 4003, q: "The Magistrate sets a minimum wage at $16 when the equilibrium wage is $12. At $16, firms demand 70,000 workers and 110,000 workers want jobs. What is the best diagnosis?", options: ["The floor is binding and creates a labor surplus of 40,000 workers", "The floor is binding and creates a labor shortage of 40,000 workers", "The floor is nonbinding because workers prefer higher wages", "The floor increases labor demand by 40,000 workers"], a: 0, tag: "price_floor", type: "multi-step", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "binding_floor_surplus_calculation", secondarySkills: ["minimum_wage", "labor_surplus", "unemployment"], repairSkill: "binding_price_floor", commonError: "confuses_labor_surplus_with_shortage", feedback: "A price floor above equilibrium is binding. Labor surplus equals quantity supplied minus quantity demanded, so 110,000 - 70,000 = 40,000 workers." },
 { id: 4004, q: "A minimum wage raises pay for workers who keep their jobs, but firms hire fewer workers and more workers seek jobs. Which statement gives the best economic interpretation?", options: ["The policy helps some employed workers, but it also creates a labor surplus among workers seeking jobs", "The policy helps workers as a group because the higher wage applies to anyone willing to work", "The policy helps firms attract more workers, so labor demand rises with the legal wage", "The policy leaves employment unchanged because only the legal wage has changed"], a: 0, tag: "price_floor", type: "synthesis", objective: "LO6.2", difficulty: "finalBoss", conceptCluster: "government_policy", primarySkill: "minimum_wage_tradeoff", secondarySkills: ["policy_tradeoff", "labor_surplus", "quantity_demanded_labor"], repairSkill: "binding_price_floor", commonError: "counts_only_workers_who_keep_jobs", feedback: "A binding minimum wage creates winners and losers. Some employed workers earn more, but firms hire fewer workers and a labor surplus appears." },
@@ -8922,7 +8922,5 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
-
-
 
 
