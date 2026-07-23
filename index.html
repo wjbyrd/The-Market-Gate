@@ -2433,6 +2433,24 @@ body.game-active #soundToggle {
     .mastery-row-score{ white-space:normal; }
 }
 
+/* =========================================
+   16. INSTRUCTIONAL RESOURCE RECOMMENDATIONS
+========================================= */
+.resource-recommendation-section{ margin-top:14px; }
+.resource-recommendation-intro{ color:#d8efff; line-height:1.55; margin:0 0 14px; }
+.resource-recommendation-list{ display:grid; grid-template-columns:1fr; gap:12px; }
+.resource-card{ min-width:0; padding:16px; border:1px solid rgba(247,217,130,0.42); border-radius:11px; background:linear-gradient(135deg, rgba(12,46,76,0.9), rgba(2,12,29,0.96)); box-shadow:0 0 16px rgba(0,0,0,0.38), inset 0 0 18px rgba(56,189,248,0.07); }
+.resource-card-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.resource-card-title{ min-width:0; color:#f8e3a0; font-size:17px; font-weight:800; line-height:1.32; overflow-wrap:anywhere; }
+.resource-card-type{ flex:0 0 auto; max-width:100%; padding:4px 8px; border:1px solid rgba(56,189,248,0.44); border-radius:999px; color:#c7ecff; font-size:10px; font-weight:800; letter-spacing:.8px; line-height:1.2; text-transform:uppercase; overflow-wrap:anywhere; }
+.resource-card-description{ margin:10px 0 14px; color:rgba(238,246,255,0.9); line-height:1.55; overflow-wrap:anywhere; }
+.resource-card-link{ display:inline-flex; align-items:center; justify-content:center; min-height:40px; max-width:100%; padding:9px 14px; border:1px solid rgba(247,217,130,0.76); border-radius:8px; background:linear-gradient(180deg, #16587c, #0b3554); box-shadow:0 0 14px rgba(56,189,248,0.18); color:#fff7d7; font-weight:800; letter-spacing:.35px; text-align:center; text-decoration:none; transition:background .18s ease, box-shadow .18s ease, transform .18s ease; }
+.resource-card-link:hover{ background:linear-gradient(180deg, #24749b, #104867); box-shadow:0 0 18px rgba(247,217,130,0.3), 0 0 22px rgba(56,189,248,0.2); transform:translateY(-1px); }
+.resource-card-link:focus-visible{ outline:3px solid #f8e3a0; outline-offset:3px; box-shadow:0 0 0 5px rgba(56,189,248,0.5); }
+.review-materials-screen .mastery-section h2{ margin:0 0 12px; color:#f7d982; font-size:18px; letter-spacing:.7px; }
+.review-objective-list{ margin:0; padding-left:22px; color:#eef6ff; }
+.review-objective-list li{ margin:7px 0; line-height:1.48; }
+@media(max-width:420px){ .resource-card{ padding:14px; } .resource-card-header{ align-items:flex-start; flex-direction:column; gap:8px; } .resource-card-type{ white-space:normal; } .resource-card-link{ display:flex; width:100%; box-sizing:border-box; } }
 </style>
 </head>
 
@@ -2689,6 +2707,7 @@ DO NOT REMOVE:
 <!-- =========================================
    2. GAME ELEMENTS (CHANGE ELEMENTS WITH NEW GAME)
 ========================================= -->
+<script src="instructional_resources.js"></script>
  <script>
 
 // =============================================
@@ -8579,6 +8598,181 @@ function getMasteryReportModeName(){
     return getModeDisplayName();
 }
 
+// =====================================================
+// INSTRUCTIONAL RESOURCE RECOMMENDATIONS
+// The catalog lives in instructional_resources.js. Matching accepts the
+// engine's detailed objective keys, then falls back to chapter resources.
+// =====================================================
+const INSTRUCTIONAL_RESOURCE_TYPE_LABELS = {
+    "video": "Lecture Video",
+    "worked-problem": "Worked-Problems Video",
+    "slides": "Lecture Slides",
+    "other": "Course Material"
+};
+const INSTRUCTIONAL_RESOURCE_TYPE_ORDER = {
+    "video": 1,
+    "worked-problem": 2,
+    "slides": 3,
+    "other": 4
+};
+
+function getInstructionalResourceConfig(){
+    const config = window.INSTRUCTIONAL_RESOURCES;
+    if(!config || typeof config !== "object"){
+        console.warn("[Market Gate] Instructional-resource catalog is unavailable.");
+        return null;
+    }
+    return validateInstructionalResourceConfig(config) ? config : null;
+}
+
+function validateInstructionalResourceConfig(config){
+    if(!config || typeof config !== "object") return false;
+    if(!config.chapters || typeof config.chapters !== "object"){
+        console.warn("[Market Gate] Instructional-resource catalog has no chapters object.");
+        return false;
+    }
+    if(config.objectives && typeof config.objectives !== "object"){
+        console.warn("[Market Gate] Instructional-resource objectives must be an object; ignoring objective mappings.");
+    }
+    return true;
+}
+
+function normalizeLearningObjectiveId(value){
+    const match = String(value || "").trim().match(/(?:LO\s*)?(\d+)\s*[._\-\s]\s*(\d+)/i);
+    return match ? `${Number(match[1])}.${Number(match[2])}` : null;
+}
+
+function getChapterFromLearningObjective(value){
+    const normalized = normalizeLearningObjectiveId(value);
+    return normalized ? normalized.split(".")[0] : null;
+}
+
+function getObjectiveResourceMapping(config, normalizedObjective){
+    if(!config || !config.objectives || typeof config.objectives !== "object") return null;
+    return Object.entries(config.objectives).find(([id]) => normalizeLearningObjectiveId(id) === normalizedObjective)?.[1] || null;
+}
+
+function isSafeInstructionalResourceUrl(value){
+    if(typeof value !== "string" || !value.trim()) return false;
+    const url = value.trim();
+    if(/^https:\/\//i.test(url)){
+        try { return new URL(url).protocol === "https:"; }
+        catch(error) { console.warn("[Market Gate] Ignoring instructional resource with an invalid URL.", error); return false; }
+    }
+    return /^resources\/(?:[^\\/:?#]+\/)*[^\\/:?#]+\.(?:ppt|pptx|pdf)$/i.test(url)
+        && !/(?:^|\/)\.\.(?:\/|$)/.test(url);
+}
+
+function resolveInstructionalResourceById(config, resourceId){
+    if(!config || !resourceId) return null;
+    for(const chapter of Object.values(config.chapters || {})){
+        for(const resource of (Array.isArray(chapter?.resources) ? chapter.resources : [])){
+            if(resource?.id !== resourceId) continue;
+            if(typeof resource.title !== "string" || !resource.title.trim() || !isSafeInstructionalResourceUrl(resource.url)){
+                console.warn(`[Market Gate] Ignoring malformed instructional resource: ${resourceId}`);
+                return null;
+            }
+            return resource;
+        }
+    }
+    console.warn(`[Market Gate] Instructional resource ID was not found: ${resourceId}`);
+    return null;
+}
+
+function getRecommendedResources(weakObjectiveIds){
+    const config = getInstructionalResourceConfig();
+    if(!config || !Array.isArray(weakObjectiveIds) || weakObjectiveIds.length === 0) return [];
+
+    const settings = config.settings && typeof config.settings === "object" ? config.settings : {};
+    const maximum = Math.max(1, Math.min(3, Number(settings.maximumRecommendations) || 3));
+    const allowFallback = settings.enableChapterFallback !== false;
+    const selected = new Map();
+
+    function addResource(resource){
+        if(!resource?.id || selected.has(resource.id) || !isSafeInstructionalResourceUrl(resource.url)) return;
+        selected.set(resource.id, resource);
+    }
+
+    weakObjectiveIds.forEach(objectiveId => {
+        if(selected.size >= maximum) return;
+        const normalized = normalizeLearningObjectiveId(objectiveId);
+        if(!normalized) return;
+        const mapping = getObjectiveResourceMapping(config, normalized);
+        (Array.isArray(mapping?.resourceIds) ? mapping.resourceIds : [])
+            .map(id => resolveInstructionalResourceById(config, id)).filter(Boolean).forEach(addResource);
+
+        if(!allowFallback || selected.size >= maximum) return;
+        const chapter = config.chapters?.[getChapterFromLearningObjective(normalized)];
+        if(!chapter || !Array.isArray(chapter.resources)){
+            console.warn(`[Market Gate] No chapter fallback is available for LO ${normalized}.`);
+            return;
+        }
+        const fallbackResources = Array.isArray(chapter.fallbackResourceIds) ? chapter.fallbackResourceIds.map(id => resolveInstructionalResourceById(config, id)).filter(Boolean) : chapter.resources.slice().sort((a, b) => (Number(a?.priority) || 999) - (Number(b?.priority) || 999));
+        fallbackResources.forEach(addResource);
+    });
+
+    return Array.from(selected.values()).slice(0, maximum);
+}
+function getWeakLearningObjectiveIds(report){
+    return report?.hasObjectiveWeakness && Array.isArray(report.weakestObjectives)
+        ? report.weakestObjectives.map(entry => entry?.key).filter(Boolean)
+        : [];
+}
+
+function getInstructionalObjectiveTitle(objectiveId){
+    const normalized = normalizeLearningObjectiveId(objectiveId);
+    const config = getInstructionalResourceConfig();
+    const mappedTitle = normalized ? getObjectiveResourceMapping(config, normalized)?.title : "";
+    return mappedTitle || (normalized ? `LO ${normalized}` : formatMasteryLabel(objectiveId));
+}
+
+function getInstructionalResourceActionLabel(resource){
+    if(typeof resource?.actionLabel === "string" && resource.actionLabel.trim()) return resource.actionLabel;
+    return resource?.type === "slides" ? "Open Slides" : "Watch Video";
+}
+
+function renderInstructionalResourceCards(resources){
+    return resources.map(resource => {
+        const type = INSTRUCTIONAL_RESOURCE_TYPE_LABELS[resource.type] || INSTRUCTIONAL_RESOURCE_TYPE_LABELS.other;
+        const description = typeof resource.description === "string" && resource.description.trim()
+            ? `<p class="resource-card-description">${escapeHTML(resource.description)}</p>` : "";
+        return `<article class="resource-card"><div class="resource-card-header"><h4 class="resource-card-title">${escapeHTML(resource.title)}</h4><span class="resource-card-type">${escapeHTML(type)}</span></div>${description}<a class="resource-card-link" href="${escapeHTML(resource.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(getInstructionalResourceActionLabel(resource))}<span class="sr-only">: ${escapeHTML(resource.title)}</span></a></article>`;
+    }).join("");
+}
+
+function renderInstructionalResourceSection(report){
+    const weakObjectives = getWeakLearningObjectiveIds(report);
+    if(!weakObjectives.length) return "";
+    const resources = getRecommendedResources(weakObjectives);
+    const intro = "Based on the weakest learning objectives in this run, start with these materials before your next attempt.";
+
+    if(!resources.length){
+        return `<div class="mastery-section resource-recommendation-section"><h3>Recommended Review</h3><p class="resource-recommendation-intro">${escapeHTML(intro)}</p><p class="mastery-empty">No review material is available for these objectives yet.</p></div>`;
+    }
+
+    return `<div class="mastery-section resource-recommendation-section"><h3>Recommended Review</h3><p class="resource-recommendation-intro">${escapeHTML(intro)}</p><div class="resource-recommendation-list">${renderInstructionalResourceCards(resources)}</div><div class="mastery-actions"><button class="continue-btn" type="button" onclick="openInstructionalReviewScreen()">Review Materials</button></div></div>`;
+}
+
+function openInstructionalReviewScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox) return;
+    const report = getMasteryReportData();
+    const weakObjectives = getWeakLearningObjectiveIds(report);
+    const resources = getRecommendedResources(weakObjectives);
+    const objectiveList = weakObjectives.length
+        ? `<ul class="review-objective-list">${weakObjectives.map(id => `<li>${escapeHTML(getInstructionalObjectiveTitle(id))}</li>`).join("")}</ul>`
+        : `<p class="mastery-empty">No learning objective is available for review from this report.</p>`;
+    const resourceContent = resources.length
+        ? `<p class="resource-recommendation-intro">Based on the weakest learning objectives in this run, start with these materials before your next attempt.</p><div class="resource-recommendation-list">${renderInstructionalResourceCards(resources)}</div>`
+        : `<p class="mastery-empty">No review material is available for these objectives yet.</p>`;
+
+    gameBox.innerHTML = `<section id="instructionalReviewScreen" class="mastery-report-screen review-materials-screen" aria-labelledby="instructionalReviewTitle"><h1 id="instructionalReviewTitle" class="mastery-report-title" tabindex="-1">REVIEW BEFORE YOUR NEXT ATTEMPT</h1><p class="mastery-report-subtitle">Use these materials to reinforce the concepts that showed the weakest signal in this run.</p><div class="mastery-section"><h2>Learning Objectives to Review</h2>${objectiveList}</div><div class="mastery-section"><h2>Recommended Materials</h2>${resourceContent}</div><div class="mastery-actions"><button class="continue-btn" type="button" onclick="returnToMasteryReport()">Return to Mastery Report</button><button class="continue-btn secondary-modal-btn" type="button" onclick="location.reload()">Replay Mission</button><button class="continue-btn secondary-modal-btn" type="button" onclick="returnToModeSelectFromRun()">Choose Another Battle</button></div></section>`;
+    document.getElementById("instructionalReviewTitle")?.focus?.();
+}
+
+function returnToMasteryReport(){
+    showMasteryReportScreen(true);
+}
 function getMasteryReportData(){
     const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
     const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
@@ -8629,7 +8823,7 @@ function getMasteryReportData(){
         }
 
         if(hasTypeWeakness && weakestTypes[0]){
-            nextSteps.push(`Practice ${weakestTypes[0].label} questions. That question form caused the most trouble.`);
+            nextSteps.push(`Practice ${weakestTypes[0].label} questions. That question type caused the most trouble.`);
         }
 
         if(hasSkillWeakness && weakestSkills[0]){
@@ -8670,15 +8864,16 @@ function getMasteryReportData(){
     };
 }
 
-function showMasteryReportScreen(){
+function showMasteryReportScreen(preserveResultsScreen = false){
     const gameBox = document.getElementById("gameBox");
     if(!gameBox) return;
 
-    if(!document.getElementById("masteryReportScreen")){
+    if(!preserveResultsScreen && !document.getElementById("masteryReportScreen")){
         latestResultsScreenHTML = gameBox.innerHTML;
     }
 
     const report = getMasteryReportData();
+    const recommendationSection = renderInstructionalResourceSection(report);
     const scoreCard = report.score !== null
         ? `<div class="mastery-stat-card"><span class="mastery-stat-label">Score</span><span class="mastery-stat-value">${report.score}</span></div>`
         : "";
@@ -8713,13 +8908,15 @@ function showMasteryReportScreen(){
                 cleanText: "No major objective weakness detected. Push into Legendary Mode to see whether the signal holds under harder multi-step pressure."
             })}
 
+            ${recommendationSection}
+
             ${renderMasteryDiagnosticSection({
-                weaknessTitle: "Weakest Question Forms",
-                signalTitle: "Question Form Signals",
+                weaknessTitle: "Weakest Question Types",
+                signalTitle: "Question-Type Signals",
                 entries: report.weakestTypes,
                 hasWeakness: report.hasTypeWeakness,
                 weaknessEmptyText: "No question-type weakness was detected.",
-                cleanText: "No major question-form weakness detected. The next useful test is harder prompts, closer traps, and less obvious wording."
+                cleanText: "No major weakness was detected across question types. A more challenging mode can test whether that performance holds with multi-step questions, closer answer choices, and less obvious wording."
             })}
 
             ${renderMasteryDiagnosticSection({
@@ -8801,8 +8998,8 @@ function copyMasteryReport(){
         report.hasObjectiveWeakness ? "Weakest Learning Objectives:" : "Objective Signals:",
         ...(report.hasObjectiveWeakness && report.weakestObjectives.length ? report.weakestObjectives.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major objective weakness detected. Try Legendary Mode next."]),
         "",
-        report.hasTypeWeakness ? "Weakest Question Forms:" : "Question Form Signals:",
-        ...(report.hasTypeWeakness && report.weakestTypes.length ? report.weakestTypes.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major question-form weakness detected."]),
+        report.hasTypeWeakness ? "Weakest Question Types:" : "Question-Type Signals:",
+        ...(report.hasTypeWeakness && report.weakestTypes.length ? report.weakestTypes.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major weakness was detected across question types. A more challenging mode can test whether that performance holds with multi-step questions, closer answer choices, and less obvious wording."]),
         "",
         report.hasSkillWeakness ? "Weakest Skills:" : "Skill Signals:",
         ...(report.hasSkillWeakness && report.weakestSkills.length ? report.weakestSkills.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major skill weakness detected."]),
@@ -9024,4 +9221,5 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
