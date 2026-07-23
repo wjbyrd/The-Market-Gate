@@ -205,15 +205,6 @@ body::after{
     color: #f7d982;
 }
 
-/* PLACEHOLDER */
-#emailInput::placeholder,
-#username::placeholder{
-    color: rgba(224,242,254,0.55);
-    font-style: italic;
-    letter-spacing: 0.5px;
-    text-align: center;
-}
-
 /* =========================================
    2. CORE GAME CONTAINER (#gameBox)
 ========================================= */
@@ -2523,7 +2514,6 @@ Respect structure strictly.
 <div id="startScreen">
   <div class="start-content">
     <h1 class="title">THE MARKET GATE</h1>
-    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input" aria-label="School email">
     <button class="start-btn" onclick="showModeSelect()">ENTER THE MARKET</button>
 	<button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
     CONTINUE STANDARD RUN</button>
@@ -2868,7 +2858,6 @@ let bossCheckpoint = 1;
 let correctAnswers = 0; 
 let maxStreak = 0; 
 let username = "";
-let studentEmail = "";
 let runID = "";
 let questionStartTime = 0;
 let streak = 0; 
@@ -3295,7 +3284,6 @@ function saveGameState(){
         maxStreak,
         streak,
         username,
-        studentEmail,
         runID,
         gameMode,
         conceptMemory,
@@ -3350,7 +3338,6 @@ function loadSavedGame(){
         streak = Number(saveData.streak || 0);
 
         username = saveData.username || username || "";
-        studentEmail = saveData.studentEmail || studentEmail || "";
         runID = saveData.runID || runID || "";
         gameMode = saveData.gameMode || gameMode || "standard";
 
@@ -3390,7 +3377,7 @@ function clearSavedGame(){
     }
 }
 
-function generatePseudonymFromEmail(email) {
+function generatePseudonymFromSeed(seed) {
     const titles = [
         "Axiom", "Ledger", "Vector", "Meridian", "Signal", "Cipher",
         "Frontier", "Equity", "Oracle", "Index", "Summit", "Nexus",
@@ -3404,10 +3391,10 @@ function generatePseudonymFromEmail(email) {
     ];
 
     let hash = 0;
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanSeed = String(seed || "market-gate").trim().toLowerCase();
 
-    for (let i = 0; i < cleanEmail.length; i++) {
-        hash = ((hash << 5) - hash) + cleanEmail.charCodeAt(i);
+    for (let i = 0; i < cleanSeed.length; i++) {
+        hash = ((hash << 5) - hash) + cleanSeed.charCodeAt(i);
         hash |= 0;
     }
 
@@ -4744,59 +4731,17 @@ function getMarketGateBossLine({ isCorrect, tag, type, objective, streak, bossHe
 }
   
 // =============================================
-// USERNAME RESTORE — SAFE TO MODIFY
+// LOCAL PLAYER ALIAS
 // =============================================
-// Loads previously saved username from localStorage
-// and pre-fills the input field.
-//
-// SAFE TO EDIT:
-// - key name ("gauntletUser")
-// - behavior (e.g., remove if you want fresh input every time)
-//
-// WARNING:
-// Requires input element with id="usernameInput"
-//
-// Removing this will NOT break the game,
-// but will remove convenience for returning users.
+// Canvas identifies the student when the CSV is submitted.
+// The game therefore uses a generated alias and never requests
+// or stores the student's school email.
 // =============================================
-const savedEmail = localStorage.getItem("gauntletEmail");
-const emailInput = document.getElementById("emailInput");
-
-if (savedEmail && emailInput) {
-    emailInput.value = savedEmail;
-}
-
 function hasSavedGame(mode = "standard"){
     return !!localStorage.getItem(`${SAVE_KEY}_${mode}`);
 }
 
-function validateAndStoreEmailForModeSelect(){
-    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
-
-    if (!inputEmail) {
-        alert("An email is required to enter the Gate.");
-        return false;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(inputEmail)) {
-        alert("Enter a valid email address.");
-        return false;
-    }
-
-    studentEmail = inputEmail;
-    username = generatePseudonymFromEmail(studentEmail);
-
-    localStorage.setItem("gauntletEmail", studentEmail);
-    localStorage.setItem("gauntletUser", username);
-
-    return true;
-}
-
 function showModeSelect(){
-    if(!validateAndStoreEmailForModeSelect()) return;
-
     setGameControlsVisible(false);
 
     document.getElementById("startScreen").style.display = "none";
@@ -4987,23 +4932,6 @@ showContinueButtonIfSaved();
 // - progression bugs
 // =============================================
 function startGame(shouldResume = false) {
-    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
-
-    if (!inputEmail) {
-        alert("An email is required to enter the Gate.");
-        return;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(inputEmail)) {
-        alert("Enter a valid email address.");
-        return;
-    }
-
-   studentEmail = inputEmail;
-   username = generatePseudonymFromEmail(studentEmail);
-
 const hasSavedRun = shouldResume ? loadSavedGame() : false;
 if(!hasSavedRun){
     resumedSavedRunThisSession = false;
@@ -5012,9 +4940,14 @@ if(!hasSavedRun){
 if(!hasSavedRun){
     bossCheckpoint = 1;
     runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    username = generatePseudonymFromSeed(runID);
 }
 
-localStorage.setItem("gauntletEmail", studentEmail);
+if(!username){
+    username = generatePseudonymFromSeed(runID || Date.now());
+}
+
+localStorage.removeItem("gauntletEmail");
 localStorage.setItem("gauntletUser", username);
 localStorage.setItem("gauntletRunID", runID);
 if(modeAllowsRealmProgress()){
@@ -5028,7 +4961,6 @@ sendGameData({
     game: "The Market Gate",
     event: hasSavedRun ? "resume" : "start",
     user: username,
-    email: studentEmail
 });
 
 // =============================================
@@ -5253,6 +5185,9 @@ function endTimedModeRun(){
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
+    const totalTimeMs = startTime ? (Date.now() - startTime) : timedModeDurationMs;
+    const timeString = formatTime(totalTimeMs);
+    const verificationCode = generateCode(username + "|TIMED", accuracy, maxStreak, totalTimeMs);
 
     const bestRoom = Number(localStorage.getItem("marketGateTimedBestRoom") || 0);
     if(timedHighestRoom > bestRoom){
@@ -5273,7 +5208,6 @@ function endTimedModeRun(){
         game: "The Market Gate",
         event: "timed_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -5285,10 +5219,11 @@ function endTimedModeRun(){
         streak: streak,
         elapsedTime: startTime ? (Date.now() - startTime) : 0,
         adaptiveMode: "timed_complete",
-        totalTime: timedModeDurationMs,
+        totalTime: totalTimeMs,
         accuracy: accuracy / 100,
         maxStreak: maxStreak,
-        totalAttempts: totalAttempts
+        totalAttempts: totalAttempts,
+        verificationCode: verificationCode
     });
 
     document.getElementById("bossMessage").innerText = "";
@@ -5305,11 +5240,15 @@ function endTimedModeRun(){
             Accuracy: ${accuracy}%<br>
             Total Attempts: ${totalAttempts}<br>
             Best Streak: ${maxStreak}<br>
-            Setbacks Taken: ${timedSetbacks}
+            Total Time: ${timeString}<br>
+            Setbacks Taken: ${timedSetbacks}<br>
+            Run ID: <strong>${runID}</strong><br>
+            Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
@@ -5366,24 +5305,6 @@ function getDifficultyForMode(){
          : (room <= 29) ? "hard"
          : "finalBoss";
 }
-
-// =============================================
-// INPUT SHORTCUT — SAFE TO KEEP OR REMOVE
-// =============================================
-// Allows pressing Enter to start the game
-// Improves usability, does not affect logic
-// =============================================
-document.getElementById("emailInput").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-
-        if(hasSavedGame("standard")){
-            continueSavedRun();
-        } else {
-            showModeSelect();
-        }
-    }
-});
 
 // =============================================
 // AREA NAMING SYSTEM — SAFE TO CUSTOMIZE (WITH RULES)
@@ -7186,9 +7107,11 @@ if(rapidGuess.triggered && !rapidGuessLocked){
         game: "The Market Gate",
         event: "rapid_guessing",
         user: username || "anonymous",
-        email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
+        selectedIndex: choice,
+        selectedAnswer: currentQuestion.options?.[choice] ?? "",
+        correctIndex: currentQuestion.a,
         correct: isCorrect ? 1 : 0,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
@@ -7250,9 +7173,11 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
 		game: "The Market Gate",
         event: "question",
         user: username || "anonymous",
-		email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
+        selectedIndex: choice,
+        selectedAnswer: currentQuestion.options?.[choice] ?? "",
+        correctIndex: currentQuestion.a,
         correct: isCorrect ? 1 : 0,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
@@ -7412,7 +7337,6 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
 			game: "The Market Gate",
             event: "boss_defeated",
             user: username,
-		    email: studentEmail,
             room: room
          });
            
@@ -7908,7 +7832,6 @@ function handleLegendaryVictory(){
         game: "The Market Gate",
         event: "legendary_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -7948,11 +7871,13 @@ function handleLegendaryVictory(){
             Total Attempts: ${totalAttempts}<br>
             Best Streak: ${maxStreak}<br>
             Total Time: ${timeString}<br>
+            Run ID: <strong>${runID}</strong><br>
             Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
     `;
@@ -7974,6 +7899,7 @@ function handleScoreAttackVictory(){
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
+    const verificationCode = generateCode(username + "|SCORE", accuracy, maxStreak, totalTimeMs);
 
     storeScoreAttackFinalStats(accuracy, totalTimeMs);
 
@@ -7982,7 +7908,6 @@ function handleScoreAttackVictory(){
         game: "The Market Gate",
         event: "score_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -8000,7 +7925,8 @@ function handleScoreAttackVictory(){
         totalAttempts: totalAttempts,
         score: scoreAttackScore,
         bestScore: scoreAttackBestScore,
-        scoreEvents: JSON.stringify(scoreAttackEvents)
+        scoreEvents: JSON.stringify(scoreAttackEvents),
+        verificationCode: verificationCode
     });
 
     let scoreLine = "Respectable. The Gate noticed.";
@@ -8027,11 +7953,14 @@ function handleScoreAttackVictory(){
             Accuracy: ${accuracy}%<br>
             Total Attempts: ${totalAttempts}<br>
             Best Streak: ${maxStreak}<br>
-            Total Time: ${timeString}
+            Total Time: ${timeString}<br>
+            Run ID: <strong>${runID}</strong><br>
+            Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartScoreAttackMode()">Retry Score Attack</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
@@ -8052,6 +7981,9 @@ function handlePracticeModeComplete(){
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
+    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const timeString = formatTime(totalTimeMs);
+    const verificationCode = generateCode(username + "|" + String(gameMode).toUpperCase(), accuracy, maxStreak, totalTimeMs);
 
 	if(gameMode === "exam"){
  	   markExamDrillCompleted();
@@ -8062,7 +7994,6 @@ function handlePracticeModeComplete(){
         game: "The Market Gate",
         event: `${gameMode}_complete`,
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -8072,12 +8003,13 @@ function handlePracticeModeComplete(){
         responseTime: 0,
         attempt: totalAttempts,
         streak: streak,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: totalTimeMs,
         adaptiveMode: `${gameMode}_complete`,
-        totalTime: startTime ? (Date.now() - startTime) : 0,
+        totalTime: totalTimeMs,
         accuracy: accuracy / 100,
         maxStreak: maxStreak,
-        totalAttempts: totalAttempts
+        totalAttempts: totalAttempts,
+        verificationCode: verificationCode
     });
 
     document.getElementById("bossMessage").innerText = "";
@@ -8092,11 +8024,15 @@ function handlePracticeModeComplete(){
             You reached the end of this practice path.<br><br>
             Accuracy: ${accuracy}%<br>
             Total Attempts: ${totalAttempts}<br>
-            Best Streak: ${maxStreak}
+            Best Streak: ${maxStreak}<br>
+            Total Time: ${timeString}<br>
+            Run ID: <strong>${runID}</strong><br>
+            Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Battle</button>
     `;
@@ -8218,7 +8154,6 @@ sendGameData({
 	game: "The Market Gate",
     event: "complete",
     user: username,
-	email: studentEmail,
     room: room,
     questionId: 0,
     correct: 1,
@@ -8293,6 +8228,7 @@ else if(accuracy < 75){
             <p>Market Record: <strong>${username}</strong></p>
             <p>Accuracy: <strong>${accuracy}%</strong> | Best Streak: <strong>${maxStreak}</strong></p>
             <p>Elapsed Time: <strong>${timeString}</strong> | Total Questions: <strong>${totalAttempts}</strong></p>
+            <p style="font-size:0.8em; color:#9ca3af;">Run ID: <span style="color:#c7ecff;">${runID}</span></p>
             <p style="font-size:0.8em; color:#9ca3af;">Verification Code: <span id="vCode" style="color:#f0c86a;">${verificationCode}</span></p>
         </div>
 
@@ -8301,6 +8237,9 @@ else if(accuracy < 75){
         </p>
 
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+            <button onclick="downloadTelemetryCsv()" style="background:linear-gradient(180deg,#16587c,#0b3554); color:#fff7d7; font-weight:bold; padding:12px 24px; border:1px solid rgba(247,217,130,0.7); border-radius:6px; cursor:pointer;">
+                Download Game Data
+            </button>
             <button id="shareBtn" onclick="copyResults()" style="background:linear-gradient(180deg,#f0c86a,#9a6b1f); color:#111827; font-weight:bold; padding:12px 24px; border:1px solid rgba(255,255,255,0.25); border-radius:6px; cursor:pointer;">
                 Copy Results
             </button>
@@ -8959,6 +8898,7 @@ function showMasteryReportScreen(preserveResultsScreen = false){
             </div>
 
             <div class="mastery-actions">
+                <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
                 <button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
                 ${report.noMajorWeakness && gameMode !== "legendary" ? `<button class="continue-btn" onclick="startSelectedMode('legendary')">Enter Legendary Mode</button>` : ""}
                 <button class="continue-btn secondary-modal-btn" onclick="restoreResultsScreen()">Back to Results</button>
@@ -9141,6 +9081,7 @@ Time: ${timeString}
 Accuracy: ${accuracy}%
 Best Streak: ${maxStreak}
 Total Questions: ${totalAttempts}
+Run ID: ${runID}
 Code: ${code}
 Verified by The Custodian`;
 
@@ -9159,52 +9100,195 @@ Verified by The Custodian`;
     });
 }
 
-function sendGameData(data) {
-  const payload = {
-    timestamp: new Date().toISOString(),
-    runID: data.runID || localStorage.getItem("gauntletRunID") || "",
-    token: data.token || "",
-    version: "Gate-ms-telemetry-v3.5",
-    userAgent: navigator.userAgent || "",
-    game: data.game || "The Market Gate",
-    mode: data.mode || gameMode || "standard",
-    event: data.event || "",
-    user: data.user || username || "anonymous",
-	email: studentEmail || "",  
-    room: Number(data.room ?? 0),
-    questionId: Number(data.questionId ?? data.question ?? 0),
-    correct: Number(data.correct ?? 0),
-    tag: data.tag || "",
-    type: data.type || "",
-    objective: data.objective || "",
-    responseTime: Number(data.responseTime ?? data.responseTimeMs ?? 0),
-    attempt: Number(data.attempt ?? 0),
-    streak: Number(data.streak ?? 0),
-    elapsedTime: Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
-    adaptiveMode: data.adaptiveMode || adaptiveMode || "",
-	mode: data.mode || gameMode || "standard",
-    totalTime: Number(data.totalTime ?? data.totalTimeMs ?? 0),
-    accuracy: Number(data.accuracy ?? 0),
-    maxStreak: Number(data.maxStreak ?? 0),
-    totalAttempts: Number(data.totalAttempts ?? data.attempts ?? 0),
-    verificationCode: data.verificationCode || data.code || "",
+// =============================================
+// LOCAL QUESTION TELEMETRY — NO NETWORK TRANSMISSION
+// =============================================
+// Each event is stored in this browser under its run ID.
+// At completion, the student downloads a CSV and submits it
+// through Canvas. No Power Automate URL, email address, browser
+// fingerprint, API key, or external JSON request is used.
+// =============================================
+const TELEMETRY_PREFIX = "marketGateTelemetry_";
+const TELEMETRY_VERSION = "Gate-local-telemetry-v2";
+const GAME_VERSION = "Market-Gate-2026.07.23.1";
 
-    // SCORE ATTACK MODE ADDITION:
-    // These fields are blank/zero outside Score Attack unless passed explicitly.
-    score: Number(data.score ?? scoreAttackScore ?? 0),
-    bestScore: Number(data.bestScore ?? scoreAttackBestScore ?? 0),
-    scoreEvents: data.scoreEvents || ""
-  };
+const TELEMETRY_COLUMNS = [
+    "eventID",
+    "timestamp",
+    "telemetryVersion",
+    "gameVersion",
+    "runID",
+    "game",
+    "mode",
+    "event",
+    "room",
+    "questionID",
+    "questionVersion",
+    "difficulty",
+    "selectedIndex",
+    "selectedAnswer",
+    "correctIndex",
+    "correct",
+    "tag",
+    "type",
+    "objective",
+    "responseTimeMs",
+    "attempt",
+    "streak",
+    "elapsedTimeMs",
+    "adaptiveMode",
+    "remediationStage",
+    "priorExposureCount",
+    "firstExposure",
+    "score",
+    "bestScore",
+    "totalTimeMs",
+    "accuracy",
+    "maxStreak",
+    "totalAttempts",
+    "verificationCode"
+];
 
-  fetch("https://default8de80de86d8a47cbb5bc7fb9b5bf1c.64.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/239b526e4b9f4c1997a009d53a32267a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qQhDuP6P3K8mxdCKyBaMw6S0IPd8rBn8BUAEi_CtlxQ", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  }).catch(err => console.log("Telemetry failed:", err));
+function createTelemetryEventID(){
+    if(window.crypto && typeof window.crypto.randomUUID === "function"){
+        return window.crypto.randomUUID();
+    }
+
+    return `evt-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
-   
+
+function getTelemetryKey(activeRunID = runID){
+    return `${TELEMETRY_PREFIX}${activeRunID || "unknown-run"}`;
+}
+
+function readLocalTelemetry(activeRunID = runID){
+    try {
+        const raw = localStorage.getItem(getTelemetryKey(activeRunID));
+        return raw ? JSON.parse(raw) : [];
+    } catch(error){
+        console.warn("Telemetry could not be read:", error);
+        return [];
+    }
+}
+
+function sendGameData(data = {}){
+    try {
+        const activeRunID = data.runID
+            || runID
+            || localStorage.getItem("gauntletRunID")
+            || `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+        if(!runID) runID = activeRunID;
+
+        const records = readLocalTelemetry(activeRunID);
+        const questionID = Number(data.questionId ?? data.question ?? 0);
+        const normalizedMode = String(data.mode || gameMode || "standard")
+            .replace(/-complete$/, "");
+
+        const selectedIndex = Number(data.selectedIndex ?? -1);
+        const selectedAnswer = data.selectedAnswer
+            ?? (selectedIndex >= 0 && Array.isArray(currentQuestion?.options)
+                ? currentQuestion.options[selectedIndex] ?? ""
+                : "");
+
+        const priorExposureCount = questionID > 0
+            ? records.filter(item =>
+                Number(item.questionID) === questionID
+                && (item.event === "question" || item.event === "rapid_guessing")
+              ).length
+            : 0;
+
+        const record = {
+            eventID: createTelemetryEventID(),
+            timestamp: new Date().toISOString(),
+            telemetryVersion: TELEMETRY_VERSION,
+            gameVersion: GAME_VERSION,
+            runID: activeRunID,
+            game: data.game || "The Market Gate",
+            mode: normalizedMode,
+            event: data.event || "",
+            room: Number(data.room ?? room ?? 0),
+            questionID,
+            questionVersion: Number(data.questionVersion ?? currentQuestion?.version ?? 1),
+            difficulty: data.difficulty || currentQuestion?.difficulty || (typeof getDifficultyForMode === "function" ? getDifficultyForMode() : ""),
+            selectedIndex,
+            selectedAnswer: String(selectedAnswer ?? ""),
+            correctIndex: Number(data.correctIndex ?? -1),
+            correct: Number(data.correct ?? 0),
+            tag: data.tag || "",
+            type: data.type || "",
+            objective: data.objective || "",
+            responseTimeMs: Number(data.responseTime ?? data.responseTimeMs ?? 0),
+            attempt: Number(data.attempt ?? 0),
+            streak: Number(data.streak ?? 0),
+            elapsedTimeMs: Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
+            adaptiveMode: data.adaptiveMode || adaptiveMode || "",
+            remediationStage: data.remediationStage || (remediationState?.active ? remediationState.stage || "" : ""),
+            priorExposureCount,
+            firstExposure: questionID > 0 && priorExposureCount === 0 ? 1 : 0,
+            score: Number(data.score ?? scoreAttackScore ?? 0),
+            bestScore: Number(data.bestScore ?? scoreAttackBestScore ?? 0),
+            totalTimeMs: Number(data.totalTime ?? data.totalTimeMs ?? 0),
+            accuracy: Number(data.accuracy ?? 0),
+            maxStreak: Number(data.maxStreak ?? 0),
+            totalAttempts: Number(data.totalAttempts ?? data.attempts ?? 0),
+            verificationCode: data.verificationCode || data.code || ""
+        };
+
+        records.push(record);
+
+        // Guard against runaway storage while preserving far more than one run needs.
+        if(records.length > 1500){
+            records.splice(0, records.length - 1500);
+        }
+
+        localStorage.setItem(getTelemetryKey(activeRunID), JSON.stringify(records));
+        localStorage.setItem("marketGateLatestTelemetryRunID", activeRunID);
+    } catch(error){
+        console.warn("Local telemetry could not be saved:", error);
+    }
+}
+
+function escapeCsvValue(value){
+    if(value === null || value === undefined) return '""';
+    return `"${String(value).replace(/"/g, '""')}"`;
+}
+
+function downloadTelemetryCsv(activeRunID = runID){
+    const resolvedRunID = activeRunID
+        || localStorage.getItem("marketGateLatestTelemetryRunID")
+        || "unknown-run";
+    const records = readLocalTelemetry(resolvedRunID);
+
+    if(!records.length){
+        alert("No game data is available for this run.");
+        return;
+    }
+
+    const rows = [
+        TELEMETRY_COLUMNS.join(","),
+        ...records.map(record => TELEMETRY_COLUMNS
+            .map(column => escapeCsvValue(record[column]))
+            .join(","))
+    ];
+
+    const csv = rows.join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const safeMode = String(records[records.length - 1]?.mode || gameMode || "run")
+        .replace(/[^a-z0-9_-]+/gi, "-")
+        .toLowerCase();
+
+    link.href = url;
+    link.download = `market-gate_${safeMode}_${resolvedRunID}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 // =====================================================
 // IF SOMETHING BREAKS:
 //
