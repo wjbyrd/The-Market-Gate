@@ -2862,6 +2862,9 @@ let runID = "";
 let questionStartTime = 0;
 let streak = 0; 
 let startTime; // Will be set in startGame()
+let finalElapsedTimeMs = null;
+function getElapsedTimeMs(){ return Number.isFinite(finalElapsedTimeMs) ? finalElapsedTimeMs : (startTime ? (Date.now() - startTime) : 0); }
+function freezeCompletionTime(fallbackMs = 0){ if(!Number.isFinite(finalElapsedTimeMs)) finalElapsedTimeMs = startTime ? (Date.now() - startTime) : fallbackMs; return finalElapsedTimeMs; }
 let room = localStorage.getItem("marketGateRoom") ? parseInt(localStorage.getItem("marketGateRoom")) : 1;
 let currentQuestion = null;
 let detourActive = false;
@@ -4934,6 +4937,7 @@ showContinueButtonIfSaved();
 function startGame(shouldResume = false) {
 const hasSavedRun = shouldResume ? loadSavedGame() : false;
 if(!hasSavedRun){
+    finalElapsedTimeMs = null;
     resumedSavedRunThisSession = false;
 }
 
@@ -4947,7 +4951,6 @@ if(!username){
     username = generatePseudonymFromSeed(runID || Date.now());
 }
 
-localStorage.removeItem("gauntletEmail");
 localStorage.setItem("gauntletUser", username);
 localStorage.setItem("gauntletRunID", runID);
 if(modeAllowsRealmProgress()){
@@ -5185,7 +5188,7 @@ function endTimedModeRun(){
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
-    const totalTimeMs = startTime ? (Date.now() - startTime) : timedModeDurationMs;
+    const totalTimeMs = freezeCompletionTime(timedModeDurationMs);
     const timeString = formatTime(totalTimeMs);
     const verificationCode = generateCode(username + "|TIMED", accuracy, maxStreak, totalTimeMs);
 
@@ -7112,7 +7115,11 @@ if(rapidGuess.triggered && !rapidGuessLocked){
         selectedIndex: choice,
         selectedAnswer: currentQuestion.options?.[choice] ?? "",
         correctIndex: currentQuestion.a,
-        correct: isCorrect ? 1 : 0,
+        answerKeyMatch: isCorrect ? 1 : 0,
+
+        correct: 0,
+
+        rapidGuessing: 1,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
@@ -7178,7 +7185,11 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         selectedIndex: choice,
         selectedAnswer: currentQuestion.options?.[choice] ?? "",
         correctIndex: currentQuestion.a,
+        answerKeyMatch: isCorrect ? 1 : 0,
+
         correct: isCorrect ? 1 : 0,
+
+        rapidGuessing: 0,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
@@ -7822,7 +7833,7 @@ function handleLegendaryVictory(){
         sfxVictory.play();
     }
 
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
     const verificationCode = generateCode(username + "|LEGENDARY", accuracy, maxStreak, totalTimeMs);
@@ -7894,7 +7905,7 @@ function handleLegendaryVictory(){
 function handleScoreAttackVictory(){
     stopTimedModeClock();
 
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
@@ -7981,7 +7992,7 @@ function handlePracticeModeComplete(){
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const verificationCode = generateCode(username + "|" + String(gameMode).toUpperCase(), accuracy, maxStreak, totalTimeMs);
 
@@ -8144,7 +8155,7 @@ function handleVictory() {
         sfxVictory.play();
     }
     
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = Math.round((correctAnswers / totalAttempts) * 100);
     const verificationCode = generateCode(username, accuracy, maxStreak, totalTimeMs);
@@ -8713,7 +8724,7 @@ function returnToMasteryReport(){
     showMasteryReportScreen(true);
 }
 function getMasteryReportData(){
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs = freezeCompletionTime();
     const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
     const tagEntries = getEntriesFromBuckets(masteryState.byTag || {}, "tag");
     const objectiveEntries = getEntriesFromBuckets(masteryState.byObjective || {}, "objective");
@@ -9070,7 +9081,7 @@ function formatTime(ms) {
 // Removing those will break this function.
 // =============================================     
 function copyResults() {
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const code = document.getElementById("vCode").innerText;
     const accuracy = Math.round((correctAnswers / totalAttempts) * 100);
@@ -9109,8 +9120,8 @@ Verified by The Custodian`;
 // fingerprint, API key, or external JSON request is used.
 // =============================================
 const TELEMETRY_PREFIX = "marketGateTelemetry_";
-const TELEMETRY_VERSION = "Gate-local-telemetry-v2";
-const GAME_VERSION = "Market-Gate-2026.07.23.1";
+const TELEMETRY_VERSION = "Gate-local-telemetry-v3";
+const GAME_VERSION = "Market-Gate-2026.07.23.2";
 
 const TELEMETRY_COLUMNS = [
     "eventID",
@@ -9128,7 +9139,9 @@ const TELEMETRY_COLUMNS = [
     "selectedIndex",
     "selectedAnswer",
     "correctIndex",
+    "answerKeyMatch",
     "correct",
+    "rapidGuessing",
     "tag",
     "type",
     "objective",
@@ -9191,6 +9204,10 @@ function sendGameData(data = {}){
                 ? currentQuestion.options[selectedIndex] ?? ""
                 : "");
 
+        const eventName = data.event || "";
+        const isResponseEvent = eventName === "question" || eventName === "rapid_guessing";
+        const isCompletionEvent = /(?:^|_)complete$/.test(eventName);
+
         const priorExposureCount = questionID > 0
             ? records.filter(item =>
                 Number(item.questionID) === questionID
@@ -9206,7 +9223,7 @@ function sendGameData(data = {}){
             runID: activeRunID,
             game: data.game || "The Market Gate",
             mode: normalizedMode,
-            event: data.event || "",
+            event: eventName,
             room: Number(data.room ?? room ?? 0),
             questionID,
             questionVersion: Number(data.questionVersion ?? currentQuestion?.version ?? 1),
@@ -9214,14 +9231,16 @@ function sendGameData(data = {}){
             selectedIndex,
             selectedAnswer: String(selectedAnswer ?? ""),
             correctIndex: Number(data.correctIndex ?? -1),
-            correct: Number(data.correct ?? 0),
+            answerKeyMatch: isResponseEvent ? Number(data.answerKeyMatch ?? data.correct ?? 0) : 0,
+            correct: isResponseEvent ? Number(data.correct ?? 0) : 0,
+            rapidGuessing: isResponseEvent ? Number(data.rapidGuessing ?? (eventName === "rapid_guessing" ? 1 : 0)) : 0,
             tag: data.tag || "",
             type: data.type || "",
             objective: data.objective || "",
             responseTimeMs: Number(data.responseTime ?? data.responseTimeMs ?? 0),
             attempt: Number(data.attempt ?? 0),
             streak: Number(data.streak ?? 0),
-            elapsedTimeMs: Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
+            elapsedTimeMs: isCompletionEvent ? Number(data.totalTime ?? data.totalTimeMs ?? 0) : Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
             adaptiveMode: data.adaptiveMode || adaptiveMode || "",
             remediationStage: data.remediationStage || (remediationState?.active ? remediationState.stage || "" : ""),
             priorExposureCount,
